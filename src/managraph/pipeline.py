@@ -3,9 +3,13 @@
 Steps, in order:
 
 1. download  - fetch Scryfall bulk data (``managraph.download``)
-
-Later steps (convert to RDF, load into Oxigraph, SHACL validation) get added to
-``run`` as they are implemented.
+2. convert   - write N-Triples to data/rdf/ (``managraph.convert``)
+3. load      - build an Oxigraph store in store/ (``managraph.load``)
+4. infer     - write inferred triples to data/rdf/inferred.nt.gz (``managraph.infer``)
+5. validate  - check the graph against shapes/ with SHACL (``managraph.validate``);
+               fails the build on sh:Violation results, reports sh:Warning
+6. export    - write the full graph to qlever/managraph.nt.gz for QLever
+               (``managraph.export``)
 
 Usage::
 
@@ -18,7 +22,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from managraph import download
+from managraph import convert, download, export, infer, load, validate
 
 # oracle_cards holds one representative printing per card; default_cards has
 # every printing (English or the only language), needed for printing-level
@@ -34,6 +38,17 @@ def run(
     """Run every pipeline step in order."""
     print("== download ==")
     download.download(types, raw_dir, force)
+    print("== convert ==")
+    convert.convert(raw_dir)
+    print("== load ==")
+    store = load.load()
+    print("== infer ==")
+    infer.run(store)
+    del store  # free the Oxigraph store before rudof loads the graph
+    print("== validate ==")
+    validate.run(strict=True)
+    print("== export ==")
+    export.export()
 
 
 def main(argv: list[str] | None = None) -> int:

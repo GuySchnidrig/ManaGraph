@@ -1,0 +1,15 @@
+# Keyword abilities whose cards draw the most official rulings, with the rule that defines them.
+PREFIX mg:   <https://w3id.org/managraph/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?keyword ?rule (COUNT(DISTINCT ?ruling) AS ?rulings) WHERE {
+  ?card mg:hasKeyword ?k ;
+        mg:hasRuling ?ruling .
+  ?ruling mg:rulingSource "wotc" .
+  ?k a mg:KeywordAbility ;
+     rdfs:label ?keyword ;
+     mg:ruleSection ?rule .
+}
+GROUP BY ?keyword ?rule
+ORDER BY DESC(?rulings)
+LIMIT 10

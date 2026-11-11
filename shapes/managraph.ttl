@@ -1,0 +1,230 @@
+# ManaGraph SHACL shapes: data checks for the generated graph.
+#
+# Run by `uv run python -m managraph.validate` (pipeline step 5) with rudof,
+# against the ontology plus everything in data/rdf/, inferred triples
+# included. These shapes are for finding bugs, in the converter or in the
+# Scryfall data. They are not part of the published ontology.
+#
+# Severity:
+#   sh:Violation  a converter bug or broken data. Should be zero.
+#   sh:Warning    real cards that break a rule: playtest cards, Un-cards,
+#                 old wording. Reported, but expected.
+#
+# Severity belongs to a shape, so each SPARQL check with its own severity
+# gets its own node shape.
+
+@prefix mg:   <https://w3id.org/managraph/ontology#> .
+@prefix mgsh: <https://w3id.org/managraph/shapes#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+mgsh: sh:declare [ sh:prefix "mg" ; sh:namespace "https://w3id.org/managraph/ontology#"^^xsd:anyURI ] .
+
+# --- Cards ------------------------------------------------------------------
+
+mgsh:Card
+    a sh:NodeShape ;
+    sh:targetClass mg:Card ;
+    sh:property
+        [ sh:path mg:oracleId ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path mg:name ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path mg:manaValue ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ,
+        [ sh:path mg:layout ; sh:minCount 1 ; sh:maxCount 1 ; sh:class mg:Layout ] ,
+        [ sh:path mg:reserved ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ] ,
+        [ sh:path mg:gameChanger ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ] ,
+        [ sh:path mg:hasFace ; sh:minCount 1 ; sh:class mg:Face ] ,
+        [ sh:path mg:hasPrinting ; sh:minCount 1 ; sh:class mg:Printing ] ,
+        [ sh:path mg:colorIdentity ; sh:class mg:Color ] ,
+        [ sh:path mg:producesMana ; sh:class mg:ManaType ] ,
+        [ sh:path mg:hasKeyword ; sh:class mg:Keyword ] ,
+        [ sh:path mg:legalIn ; sh:class mg:Format ] ,
+        [ sh:path mg:restrictedIn ; sh:class mg:Format ] ,
+        [ sh:path mg:bannedIn ; sh:class mg:Format ] ,
+        [ sh:path mg:hasRuling ; sh:class mg:Ruling ] ;
+    sh:sparql
+        [ a sh:SPARQLConstraint ;
+          sh:message "face {?value} doesn't link back to its card with mg:faceOf" ;
+          sh:prefixes mgsh: ;
+          sh:select """
+            SELECT $this ?value WHERE {
+                $this mg:hasFace ?value .
+                FILTER NOT EXISTS { ?value mg:faceOf $this }
+            }""" ] ,
+        [ a sh:SPARQLConstraint ;
+          sh:message "two faces share the face index {?index}" ;
+          sh:prefixes mgsh: ;
+          sh:select """
+            SELECT $this ?index WHERE {
+                $this mg:hasFace ?a , ?b .
+                ?a mg:faceIndex ?index . ?b mg:faceIndex ?index .
+                FILTER(STR(?a) < STR(?b))
+            }""" ] ,
+        # Color identity (CR 903.4) comes from mana symbols and color
+        # indicators. Two constraints, not one UNION: rudof doesn't push the
+        # $this binding into UNION branches, which made one query take minutes.
+        [ a sh:SPARQLConstraint ;
+          sh:message "color {?value} from a face's color indicator is missing from the card's color identity (CR 903.4)" ;
+          sh:prefixes mgsh: ;
+          sh:select """
+            SELECT DISTINCT $this ?value WHERE {
+                $this mg:hasFace/mg:colorIndicator ?value .
+                FILTER NOT EXISTS { $this mg:colorIdentity ?value }
+            }""" ] ,
+        [ a sh:SPARQLConstraint ;
+          sh:message "color {?value} from a face's mana cost is missing from the card's color identity (CR 903.4)" ;
+          sh:prefixes mgsh: ;
+          sh:select """
+            SELECT DISTINCT $this ?value WHERE {
+                $this mg:hasFace/mg:manaCost ?cost .
+                VALUES (?value ?symbol) {
+                    (<https://w3id.org/managraph/color/W> "W") (<https://w3id.org/managraph/color/U> "U")
+                    (<https://w3id.org/managraph/color/B> "B") (<https://w3id.org/managraph/color/R> "R")
+                    (<https://w3id.org/managraph/color/G> "G")
+                }
+                FILTER(REGEX(?cost, CONCAT("[{][^}]*", ?symbol)))
+                FILTER NOT EXISTS { $this mg:colorIdentity ?value }
+            }""" ] ,
+        [ a sh:SPARQLConstraint ;
+          sh:message "the card has two legality statuses in format {?value}" ;
+          sh:prefixes mgsh: ;
+          sh:select """
+            SELECT DISTINCT $this ?value WHERE {
+                VALUES (?p ?q) { (mg:legalIn mg:restrictedIn) (mg:legalIn mg:bannedIn) (mg:restrictedIn mg:bannedIn) }
+                $this ?p ?value ; ?q ?value .
+            }""" ] .
+
+mgsh:ColorInIdentity
+    a sh:NodeShape ;
+    sh:targetClass mg:Card ;
+    sh:severity sh:Warning ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "face color {?value} is not in the card's color identity; allowed when an ability sets the color, e.g. Fallaji Wayfarer" ;
+        sh:prefixes mgsh: ;
+        sh:select """
+            SELECT DISTINCT $this ?value WHERE {
+                $this mg:hasFace/mg:color ?value .
+                FILTER NOT EXISTS { $this mg:colorIdentity ?value }
+            }""" ] .
+
+# --- Faces ------------------------------------------------------------------
+
+mgsh:Face
+    a sh:NodeShape ;
+    sh:targetClass mg:Face ;
+    sh:property
+        [ sh:path mg:faceOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:class mg:Card ] ,
+        [ sh:path mg:faceIndex ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:nonNegativeInteger ] ,
+        [ sh:path mg:name ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path mg:typeLine ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path mg:manaCost ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^(\\{[^}]+\\})*$" ] ,
+        [ sh:path mg:oracleText ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path mg:power ; sh:maxCount 1 ] ,
+        [ sh:path mg:toughness ; sh:maxCount 1 ] ,
+        [ sh:path mg:loyalty ; sh:maxCount 1 ] ,
+        [ sh:path mg:defense ; sh:maxCount 1 ] ,
+        [ sh:path mg:color ; sh:class mg:Color ] ,
+        [ sh:path mg:colorIndicator ; sh:class mg:Color ] ,
+        [ sh:path mg:hasCardType ; sh:class mg:CardType ] ,
+        [ sh:path mg:hasSupertype ; sh:class mg:Supertype ] ,
+        [ sh:path mg:hasSubtype ; sh:class mg:Subtype ] ,
+        [ sh:path mg:hasType ; sh:class mg:Type ] .
+
+mgsh:FaceHasCardType
+    a sh:NodeShape ;
+    sh:targetClass mg:Face ;
+    # On the property shape: its results take its own severity, not this node shape's.
+    sh:property [
+        sh:path mg:hasCardType ;
+        sh:minCount 1 ;
+        sh:severity sh:Warning ;
+        sh:message "face has no card type; its type line has none the rules know (Un-cards, playtest cards)" ] .
+
+mgsh:SubtypeFitsCardType
+    a sh:NodeShape ;
+    sh:targetClass mg:Face ;
+    sh:severity sh:Warning ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "subtype {?value} doesn't go with any card type of the face (CR 205.3d)" ;
+        sh:prefixes mgsh: ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                $this mg:hasSubtype ?value .
+                FILTER NOT EXISTS { ?value a ?category . ?category mg:subtypeOfCardType ?type . $this mg:hasCardType ?type }
+            }""" ] .
+
+# --- Printings and sets -----------------------------------------------------
+
+mgsh:Printing
+    a sh:NodeShape ;
+    sh:targetClass mg:Printing ;
+    sh:property
+        [ sh:path mg:scryfallId ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path mg:printingOf ; sh:minCount 1 ; sh:maxCount 1 ; sh:class mg:Card ] ,
+        [ sh:path mg:inSet ; sh:minCount 1 ; sh:maxCount 1 ; sh:class mg:Set ] ,
+        [ sh:path mg:collectorNumber ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path mg:releasedAt ; sh:maxCount 1 ; sh:datatype xsd:date ] ,
+        [ sh:path mg:rarity ; sh:maxCount 1 ; sh:class mg:Rarity ] ,
+        [ sh:path mg:frame ; sh:maxCount 1 ; sh:class skos:Concept ] ,
+        [ sh:path mg:borderColor ; sh:maxCount 1 ; sh:class skos:Concept ] ,
+        [ sh:path mg:securityStamp ; sh:maxCount 1 ; sh:class skos:Concept ] ,
+        [ sh:path mg:game ; sh:class skos:Concept ] ,
+        [ sh:path mg:finish ; sh:class skos:Concept ] ,
+        [ sh:path mg:frameEffect ; sh:class skos:Concept ] ,
+        [ sh:path mg:promoType ; sh:class skos:Concept ] ,
+        [ sh:path mg:watermark ; sh:class skos:Concept ] ,
+        [ sh:path mg:hasIllustration ; sh:class mg:Illustration ] ,
+        [ sh:path mg:multiverseId ; sh:datatype xsd:integer ] ,
+        [ sh:path mg:mtgoId ; sh:maxCount 1 ; sh:datatype xsd:integer ] ,
+        [ sh:path mg:mtgoFoilId ; sh:maxCount 1 ; sh:datatype xsd:integer ] ,
+        [ sh:path mg:arenaId ; sh:maxCount 1 ; sh:datatype xsd:integer ] ,
+        [ sh:path mg:tcgplayerId ; sh:maxCount 1 ; sh:datatype xsd:integer ] ,
+        [ sh:path mg:tcgplayerEtchedId ; sh:maxCount 1 ; sh:datatype xsd:integer ] ,
+        [ sh:path mg:cardmarketId ; sh:maxCount 1 ; sh:datatype xsd:integer ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "card {?value} doesn't link back to this printing with mg:hasPrinting" ;
+        sh:prefixes mgsh: ;
+        sh:select """
+            SELECT $this ?value WHERE {
+                $this mg:printingOf ?value .
+                FILTER NOT EXISTS { ?value mg:hasPrinting $this }
+            }""" ] .
+
+mgsh:Set
+    a sh:NodeShape ;
+    sh:targetClass mg:Set ;
+    sh:property
+        [ sh:path mg:setCode ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path mg:name ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path mg:setType ; sh:maxCount 1 ; sh:class mg:SetType ] .
+
+# --- Art --------------------------------------------------------------------
+
+mgsh:Illustration
+    a sh:NodeShape ;
+    sh:targetClass mg:Illustration ;
+    sh:property
+        [ sh:path mg:illustrationId ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path mg:illustratedBy ; sh:class mg:Artist ] .
+
+mgsh:Artist
+    a sh:NodeShape ;
+    sh:targetClass mg:Artist ;
+    sh:property
+        [ sh:path mg:artistId ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path mg:name ; sh:maxCount 1 ; sh:datatype xsd:string ] .
+
+# --- Rulings ----------------------------------------------------------------
+
+mgsh:Ruling
+    a sh:NodeShape ;
+    sh:targetClass mg:Ruling ;
+    sh:property
+        [ sh:path mg:rulingOn ; sh:minCount 1 ; sh:maxCount 1 ; sh:class mg:Card ] ,
+        [ sh:path mg:publishedAt ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:date ] ,
+        [ sh:path mg:rulingText ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ,
+        [ sh:path mg:rulingSource ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ( "wotc" "scryfall" ) ] .

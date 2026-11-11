@@ -1,0 +1,12 @@
+# Reserved List cards that are banned or restricted in Vintage.
+PREFIX mg:     <https://w3id.org/managraph/ontology#>
+PREFIX format: <https://w3id.org/managraph/format/>
+
+SELECT ?name ?status WHERE {
+  ?card mg:reserved true ;
+        mg:name ?name .
+  { ?card mg:restrictedIn format:vintage BIND("restricted" AS ?status) }
+  UNION
+  { ?card mg:bannedIn format:vintage BIND("banned" AS ?status) }
+}
+ORDER BY ?status ?name

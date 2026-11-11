@@ -1,0 +1,10 @@
+# Faces that are both a land and a creature, like Dryad Arbor.
+PREFIX mg:       <https://w3id.org/managraph/ontology#>
+PREFIX cardtype: <https://w3id.org/managraph/type/card/>
+
+SELECT ?name ?typeLine WHERE {
+  ?face mg:hasCardType cardtype:Land, cardtype:Creature ;
+        mg:name ?name ;
+        mg:typeLine ?typeLine .
+}
+ORDER BY ?name

@@ -1,0 +1,11 @@
+# Cards with the most printings, and how many different sets they appear in.
+PREFIX mg: <https://w3id.org/managraph/ontology#>
+
+SELECT ?name (COUNT(DISTINCT ?printing) AS ?printings) (COUNT(DISTINCT ?set) AS ?sets) WHERE {
+  ?card mg:name ?name ;
+        mg:hasPrinting ?printing .
+  ?printing mg:inSet ?set .
+}
+GROUP BY ?name
+ORDER BY DESC(?printings)
+LIMIT 10
