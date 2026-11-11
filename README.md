@@ -98,7 +98,9 @@ data/            downloads, generated RDF and reports (gitignored)
 
 ## Ontology
 
-The ontology lives in [`ontology/`](ontology/) as Turtle. To browse the core classes and properties as a diagram, open [`core.ttl` in WebVOWL](https://service.tib.eu/webvowl/#iri=https://raw.githubusercontent.com/GuySchnidrig/ManaGraph/refs/heads/main/ontology/core.ttl).
+The ontology lives in [`ontology/`](ontology/) as Turtle. Its documentation, with every class, property and vocabulary term, is published at [guyschnidrig.github.io/ManaGraph/ontology/](https://guyschnidrig.github.io/ManaGraph/ontology/), along with all files merged into one [`managraph.ttl`](https://guyschnidrig.github.io/ManaGraph/ontology/managraph.ttl). The `pages` workflow rebuilds it on every change to `main`; build it locally with `uv run python -m managraph.docs`.
+
+To browse the core classes and properties as a diagram, open [`core.ttl` in WebVOWL](https://service.tib.eu/webvowl/#iri=https://raw.githubusercontent.com/GuySchnidrig/ManaGraph/refs/heads/main/ontology/core.ttl).
 
 ## Data & licensing
 
