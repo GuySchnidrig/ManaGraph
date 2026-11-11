@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0](https://github.com/GuySchnidrig/ManaGraph/compare/v0.3.0...v0.4.0) (2026-11-11)
+
+
+### Features
+
+* publish the ontology documentation on GitHub Pages ([95c08e3](https://github.com/GuySchnidrig/ManaGraph/commit/95c08e3118028cf2029976a34f1965e2c7cca08d))
+* publish the ontology documentation on GitHub Pages ([2c9458a](https://github.com/GuySchnidrig/ManaGraph/commit/2c9458af3c5d71485abbfd66c3001af6ec834a12))
+
 ## [0.3.0](https://github.com/GuySchnidrig/ManaGraph/compare/v0.2.0...v0.3.0) (2026-11-11)
 
 
