@@ -7,7 +7,9 @@ Steps, in order:
 3. load      - build an Oxigraph store in store/ (``managraph.load``)
 4. infer     - write inferred triples to data/rdf/inferred.nt.gz (``managraph.infer``)
 5. validate  - check the graph against shapes/ with SHACL (``managraph.validate``);
-               reports problems, doesn't fail the build
+               fails the build on sh:Violation results, reports sh:Warning
+6. export    - write the full graph to qlever/managraph.nt.gz for QLever
+               (``managraph.export``)
 
 Usage::
 
@@ -20,7 +22,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from managraph import convert, download, infer, load, validate
+from managraph import convert, download, export, infer, load, validate
 
 # oracle_cards holds one representative printing per card; default_cards has
 # every printing (English or the only language), needed for printing-level
@@ -44,7 +46,9 @@ def run(
     infer.run(store)
     del store  # free the Oxigraph store before rudof loads the graph
     print("== validate ==")
-    validate.run()
+    validate.run(strict=True)
+    print("== export ==")
+    export.export()
 
 
 def main(argv: list[str] | None = None) -> int:

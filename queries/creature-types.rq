@@ -1,0 +1,12 @@
+# The most common creature types, counted per card (Changelings included).
+PREFIX mg:   <https://w3id.org/managraph/ontology#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?type (COUNT(DISTINCT ?card) AS ?cards) WHERE {
+  ?card mg:hasFace/mg:hasSubtype ?subtype .
+  ?subtype a mg:CreatureType ;
+           rdfs:label ?type .
+}
+GROUP BY ?type
+ORDER BY DESC(?cards)
+LIMIT 10

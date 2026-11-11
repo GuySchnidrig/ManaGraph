@@ -1,0 +1,11 @@
+# Artists with the most distinct illustrations, and the year of their first printing.
+PREFIX mg: <https://w3id.org/managraph/ontology#>
+
+SELECT ?artist (COUNT(DISTINCT ?illustration) AS ?illustrations) (MIN(YEAR(?released)) AS ?since) WHERE {
+  ?printing mg:hasIllustration ?illustration ;
+            mg:releasedAt ?released .
+  ?illustration mg:illustratedBy/mg:name ?artist .
+}
+GROUP BY ?artist
+ORDER BY DESC(?illustrations)
+LIMIT 10

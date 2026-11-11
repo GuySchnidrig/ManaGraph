@@ -1,0 +1,16 @@
+# Cards banned in Commander, grouped by the number of colors in their identity.
+PREFIX mg:     <https://w3id.org/managraph/ontology#>
+PREFIX format: <https://w3id.org/managraph/format/>
+
+SELECT ?colors (COUNT(?card) AS ?banned) (SAMPLE(?name) AS ?example) WHERE {
+  {
+    SELECT ?card ?name (COUNT(?color) AS ?colors) WHERE {
+      ?card mg:bannedIn format:commander ;
+            mg:name ?name .
+      OPTIONAL { ?card mg:colorIdentity ?color }
+    }
+    GROUP BY ?card ?name
+  }
+}
+GROUP BY ?colors
+ORDER BY ?colors

@@ -229,4 +229,5 @@ data/*
 *.oxigraph/
 store/
 # Local QLever indexes
-qlever/
+qlever/*
+!qlever/Qleverfile

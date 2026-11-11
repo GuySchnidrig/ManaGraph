@@ -1,0 +1,37 @@
+# Qleverfile for ManaGraph, for use with https://github.com/ad-freiburg/qlever-control
+#
+#   uv run managraph               # builds the graph, writes qlever/managraph.nt.gz
+#   cd qlever
+#   uvx qlever index               # build the index (needs Docker)
+#   uvx qlever start               # SPARQL endpoint on http://localhost:7019
+#   uvx qlever ui                  # optional web UI on http://localhost:8176
+#
+# Everything else in this folder (index files, logs) is gitignored.
+# QLever does no reasoning: the pipeline has already added the inferred
+# triples (data/rdf/inferred.nt.gz) to managraph.nt.gz.
+
+[data]
+NAME        = managraph
+DESCRIPTION = ManaGraph: Magic: The Gathering cards from Scryfall bulk data, with ontology and inferred triples
+FORMAT      = nt
+
+[index]
+INPUT_FILES     = managraph.nt.gz
+CAT_INPUT_FILES = zcat ${INPUT_FILES}
+SETTINGS_JSON   = { "num-triples-per-batch": 1000000 }
+
+# Set ACCESS_TOKEN on the server you deploy to (privileged commands such as
+# clearing the cache need it). Don't commit a real token.
+[server]
+PORT               = 7019
+MEMORY_FOR_QUERIES = 4G
+CACHE_MAX_SIZE     = 2G
+TIMEOUT            = 60s
+
+[runtime]
+SYSTEM = docker
+IMAGE  = docker.io/adfreiburg/qlever:latest
+
+[ui]
+UI_PORT   = 8176
+UI_CONFIG = default
