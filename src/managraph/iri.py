@@ -18,6 +18,9 @@ them. Don't change a pattern without a migration plan.
 
 External IDs map to the providers' own URLs, linked with ``skos:exactMatch``.
 MTGO and Card Kingdom IDs have no public per-ID URL, so they stay literals.
+Cards link to a Scryfall search page (``scryfall_oracle``) with
+``rdfs:seeAlso``, since a search page is related to the card, not the same
+concept.
 """
 
 from __future__ import annotations
@@ -90,7 +93,10 @@ def scryfall(scryfall_id: str) -> str:
 
 
 def scryfall_oracle(oracle_id: str) -> str:
-    """Scryfall search URL listing every printing of an oracle card."""
+    """Scryfall search URL listing every printing of an oracle card.
+
+    Link it with ``rdfs:seeAlso``, not ``skos:exactMatch``.
+    """
     query = quote(f"oracleid:{_uuid(oracle_id, 'oracle_id')}")
     return f"https://scryfall.com/search?q={query}&unique=prints"
 

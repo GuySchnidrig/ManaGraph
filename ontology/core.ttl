@@ -107,12 +107,14 @@ mg:inSet
 # joins, and as a skos:exactMatch link to the provider's URL (Scryfall,
 # Gatherer, TCGplayer, Cardmarket), built by managraph.iri. We use
 # skos:exactMatch, not owl:sameAs, so a reasoner never merges our
-# resources with the providers' web pages.
+# resources with the providers' web pages. A card has no per-ID page at
+# Scryfall, only a search listing its printings, so it links there with
+# rdfs:seeAlso instead: a search page is related, not the same concept.
 
 mg:oracleId
     a owl:DatatypeProperty, owl:FunctionalProperty ;
     rdfs:label "oracle ID"@en ;
-    rdfs:comment "Scryfall oracle ID, shared by all printings of a card."@en ;
+    rdfs:comment "Scryfall oracle ID, shared by all printings of a card. The card links to the Scryfall search for its printings, https://scryfall.com/search?q=oracleid%3A{oracle_id}&unique=prints, with rdfs:seeAlso."@en ;
     rdfs:domain mg:Card ;
     rdfs:range xsd:string .
 
