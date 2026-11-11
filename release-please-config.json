@@ -9,6 +9,7 @@
       "bump-patch-for-minor-pre-major": false,
       "extra-files": [
         "src/managraph/__init__.py",
+        "ontology/core.ttl",
         {
           "type": "toml",
           "path": "uv.lock",

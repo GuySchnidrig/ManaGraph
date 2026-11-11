@@ -9,7 +9,8 @@ All ManaGraph resources live under ``https://w3id.org/managraph/``:
 
 Cards and printings are keyed by Scryfall's UUIDs, which stay the same when
 names or text change. Faces have no ID of their own, so they are numbered by
-their position in ``card_faces`` (0 = front). Set codes are lowercased, as
+their position in ``card_faces`` (0 = front). Single-faced cards have one
+face, 0. Set codes are lowercased, as
 Scryfall serves them.
 
 These IRIs are a public contract: saved queries and external links depend on

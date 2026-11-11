@@ -1,0 +1,212 @@
+# ManaGraph core ontology: cards, faces, printings and sets.
+#
+# Card types live in types.ttl and colors and mana in mana.ttl. Both share
+# this ontology's namespace.
+
+@prefix mg:      <https://w3id.org/managraph/ontology#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix vann:    <http://purl.org/vocab/vann/> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+
+# --- Ontology ---------------------------------------------------------------
+
+<https://w3id.org/managraph/ontology>
+    a owl:Ontology ;
+    dcterms:title "ManaGraph ontology"@en ;
+    dcterms:description "Classes and properties for a linked data knowledge graph of Magic: The Gathering cards, their printings and sets, built from Scryfall bulk data."@en ;
+    dcterms:creator <https://orcid.org/0009-0003-8320-8498> ;
+    dcterms:license <https://spdx.org/licenses/MIT> ;
+    dcterms:source <https://scryfall.com/docs/api/bulk-data> ;
+    rdfs:seeAlso <https://github.com/GuySchnidrig/ManaGraph> ;
+    owl:versionInfo "0.2.0" ; # x-release-please-version
+    vann:preferredNamespacePrefix "mg" ;
+    vann:preferredNamespaceUri "https://w3id.org/managraph/ontology#" .
+
+<https://orcid.org/0009-0003-8320-8498>
+    a foaf:Person ;
+    foaf:name "Guy Schnidrig" .
+
+# --- Classes ----------------------------------------------------------------
+
+mg:Card
+    a owl:Class ;
+    rdfs:label "Card"@en ;
+    rdfs:comment "A card as a game object: the abstract work shared by all its printings (mg:hasPrinting). IRI: https://w3id.org/managraph/card/{oracle_id}, from the Scryfall oracle ID (mg:oracleId). Every card has at least one mg:Face, and the faces carry its characteristics: mana cost, type line, rules text, power and toughness. The card itself carries only what applies to the whole card, such as its full name and mana value."@en ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty mg:hasFace ;
+        owl:minCardinality "1"^^xsd:nonNegativeInteger
+    ] .
+
+mg:Face
+    a owl:Class ;
+    rdfs:label "Face"@en ;
+    rdfs:comment "One face of an mg:Card, linked to it with mg:faceOf. A single-faced card has one face. Split, adventure, flip, transform and modal double-faced cards have one per face or half. IRI: the card's IRI plus /face/{index} (mg:faceIndex)."@en .
+
+mg:Printing
+    a owl:Class ;
+    rdfs:label "Printing"@en ;
+    rdfs:comment "A specific printed version of an mg:Card (mg:printingOf) in an mg:Set (mg:inSet). IRI: https://w3id.org/managraph/printing/{scryfall_id}, from the Scryfall card ID (mg:scryfallId)."@en .
+
+mg:Set
+    a owl:Class ;
+    rdfs:label "Set"@en ;
+    rdfs:comment "A Magic set or product line that contains mg:Printing nodes. IRI: https://w3id.org/managraph/set/{set_code}, from the lowercased set code (mg:setCode)."@en .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( mg:Card mg:Face mg:Printing mg:Set ) .
+
+# --- Structure --------------------------------------------------------------
+
+mg:hasFace
+    a owl:ObjectProperty ;
+    rdfs:label "has face"@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range mg:Face ;
+    owl:inverseOf mg:faceOf .
+
+mg:faceOf
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "face of"@en ;
+    rdfs:domain mg:Face ;
+    rdfs:range mg:Card .
+
+mg:faceIndex
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "face index"@en ;
+    rdfs:comment "Position of the face on its card: 0 for a single face, the front or the left half, then 1, 2, ... in Scryfall's card_faces order."@en ;
+    rdfs:domain mg:Face ;
+    rdfs:range xsd:nonNegativeInteger .
+
+mg:hasPrinting
+    a owl:ObjectProperty ;
+    rdfs:label "has printing"@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range mg:Printing ;
+    owl:inverseOf mg:printingOf .
+
+mg:printingOf
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "printing of"@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range mg:Card .
+
+mg:inSet
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "in set"@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range mg:Set .
+
+# --- Identifiers ------------------------------------------------------------
+#
+# Each external ID appears twice: as a literal (below) for filtering and
+# joins, and as a skos:exactMatch link to the provider's URL (Scryfall,
+# Gatherer, TCGplayer, Cardmarket), built by managraph.iri. We use
+# skos:exactMatch, not owl:sameAs, so a reasoner never merges our
+# resources with the providers' web pages.
+
+mg:oracleId
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "oracle ID"@en ;
+    rdfs:comment "Scryfall oracle ID, shared by all printings of a card."@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range xsd:string .
+
+mg:scryfallId
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "Scryfall ID"@en ;
+    rdfs:comment "Scryfall card ID of a printing. The printing also links to its Scryfall API resource, https://api.scryfall.com/cards/{scryfall_id}, with skos:exactMatch."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range xsd:string .
+
+mg:setCode
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "set code"@en ;
+    rdfs:domain mg:Set ;
+    rdfs:range xsd:string .
+
+mg:collectorNumber
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "collector number"@en ;
+    rdfs:comment "Collector number within the set. A string, since numbers like \"12a\" and \"★\" occur."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range xsd:string .
+
+# --- Names ------------------------------------------------------------------
+
+mg:name
+    a owl:DatatypeProperty ;
+    rdfs:subPropertyOf rdfs:label ;
+    rdfs:label "name"@en ;
+    rdfs:comment "Name of a card, face or set. A multi-face card's name joins its face names, e.g. \"Fire // Ice\" for faces \"Fire\" and \"Ice\"."@en .
+
+# --- Whole-card characteristics ---------------------------------------------
+
+mg:manaValue
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "mana value"@en ;
+    rdfs:comment "Mana value of the card as Scryfall gives it (formerly converted mana cost): the combined value for split cards, the front face's for double-faced cards. Decimal, because Un-cards have half mana."@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range xsd:decimal .
+
+# --- Face characteristics ---------------------------------------------------
+#
+# These always sit on an mg:Face, never on the mg:Card, so a query reads
+# them the same way for every layout: ?card mg:hasFace/mg:power ?power
+
+mg:manaCost
+    a owl:DatatypeProperty ;
+    rdfs:label "mana cost"@en ;
+    rdfs:comment "Mana cost in Scryfall's symbol notation, e.g. \"{2}{W}{U}\"."@en ;
+    rdfs:range xsd:string ;
+    rdfs:domain mg:Face .
+
+mg:typeLine
+    a owl:DatatypeProperty ;
+    rdfs:label "type line"@en ;
+    rdfs:range xsd:string ;
+    rdfs:domain mg:Face .
+
+mg:oracleText
+    a owl:DatatypeProperty ;
+    rdfs:label "oracle text"@en ;
+    rdfs:comment "Current Oracle rules text, kept as a literal."@en ;
+    rdfs:range xsd:string ;
+    rdfs:domain mg:Face .
+
+mg:power
+    a owl:DatatypeProperty ;
+    rdfs:label "power"@en ;
+    rdfs:comment "A string, since values like \"*\" and \"1+*\" occur."@en ;
+    rdfs:range xsd:string ;
+    rdfs:domain mg:Face .
+
+mg:toughness
+    a owl:DatatypeProperty ;
+    rdfs:label "toughness"@en ;
+    rdfs:range xsd:string ;
+    rdfs:domain mg:Face .
+
+mg:loyalty
+    a owl:DatatypeProperty ;
+    rdfs:label "loyalty"@en ;
+    rdfs:range xsd:string ;
+    rdfs:domain mg:Face .
+
+mg:defense
+    a owl:DatatypeProperty ;
+    rdfs:label "defense"@en ;
+    rdfs:comment "Starting defense of a battle."@en ;
+    rdfs:range xsd:string ;
+    rdfs:domain mg:Face .
+
+# --- Printing and set details -----------------------------------------------
+
+mg:releasedAt
+    a owl:DatatypeProperty ;
+    rdfs:label "released at"@en ;
+    rdfs:range xsd:date .

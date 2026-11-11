@@ -228,3 +228,5 @@ data/*
 # Local Oxigraph stores
 *.oxigraph/
 store/
+# Local QLever indexes
+qlever/

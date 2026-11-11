@@ -55,4 +55,4 @@ knowledge graph of Magic: The Gathering cards
   `/managraph/set/{code}`, ...) returns 302 to the same path on the project's
   GitHub Pages site.
 
-Maintainer: @GuySchnidrig
+Maintainer: Dr. Guy Schnidrig (@GuySchnidrig, ORCID https://orcid.org/0009-0003-8320-8498)

@@ -7,10 +7,13 @@ ManaGraph is a linked data knowledge graph of Magic: The Gathering cards. It off
 ## Setup
 
 - Python ≥ 3.12, managed with **uv**. Use `uv add <pkg>` to add dependencies, `uv sync` to install them and `uv run ...` to run code. Do not use pip or conda. Commit `uv.lock`.
-- Triple store: **Oxigraph** through `pyoxigraph`.
+- Triple stores:
+  - **Building:** **Oxigraph** through `pyoxigraph`, used inside the pipeline for loading, inference and validation.
+  - **Serving:** **QLever** is the public SPARQL endpoint. It builds a read-only index from the generated N-Triples/Turtle files, rebuilt on each data update. It has no OWL reasoning, so the pipeline writes inferred triples into the data before indexing.
+  - Write only standard SPARQL 1.1, with no store-specific extensions, so either store can run every query.
 - Package code lives in `src/managraph/` (src layout, `uv_build` backend).
 - `uv run managraph` runs the full build, through `run()` in [src/managraph/pipeline.py](src/managraph/pipeline.py). Add each new step (convert, load, validate) to `run()` in order. Split the argument parsing into a `cli.py` once there are several subcommands.
-- `data/` (raw downloads, generated RDF) and local Oxigraph stores (`store/`, `*.oxigraph/`) are gitignored.
+- `data/` (raw downloads, generated RDF), local Oxigraph stores (`store/`, `*.oxigraph/`) and QLever indexes (`qlever/`) are gitignored.
 
 ## Naming
 
