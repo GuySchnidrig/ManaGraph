@@ -12,7 +12,7 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         with:
           # A PAT makes the release PR trigger the pipeline check normally.
           # With the default GITHUB_TOKEN, GitHub holds those runs for manual approval.
