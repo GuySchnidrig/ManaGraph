@@ -4,9 +4,10 @@ Steps, in order:
 
 1. download  - fetch Scryfall bulk data (``managraph.download``)
 2. convert   - write N-Triples to data/rdf/ (``managraph.convert``)
+3. load      - build an Oxigraph store in store/ (``managraph.load``)
+4. infer     - write inferred triples to data/rdf/inferred.nt.gz (``managraph.infer``)
 
-Later steps (load into Oxigraph, inference, SHACL validation) get added to
-``run`` as they are implemented.
+SHACL validation gets added to ``run`` once it is implemented.
 
 Usage::
 
@@ -19,7 +20,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from managraph import convert, download
+from managraph import convert, download, infer, load
 
 # oracle_cards holds one representative printing per card; default_cards has
 # every printing (English or the only language), needed for printing-level
@@ -37,6 +38,10 @@ def run(
     download.download(types, raw_dir, force)
     print("== convert ==")
     convert.convert(raw_dir)
+    print("== load ==")
+    store = load.load()
+    print("== infer ==")
+    infer.run(store)
 
 
 def main(argv: list[str] | None = None) -> int:
