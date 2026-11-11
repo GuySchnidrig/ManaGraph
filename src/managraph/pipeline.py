@@ -3,8 +3,9 @@
 Steps, in order:
 
 1. download  - fetch Scryfall bulk data (``managraph.download``)
+2. convert   - write N-Triples to data/rdf/ (``managraph.convert``)
 
-Later steps (convert to RDF, load into Oxigraph, SHACL validation) get added to
+Later steps (load into Oxigraph, inference, SHACL validation) get added to
 ``run`` as they are implemented.
 
 Usage::
@@ -18,7 +19,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from managraph import download
+from managraph import convert, download
 
 # oracle_cards holds one representative printing per card; default_cards has
 # every printing (English or the only language), needed for printing-level
@@ -34,6 +35,8 @@ def run(
     """Run every pipeline step in order."""
     print("== download ==")
     download.download(types, raw_dir, force)
+    print("== convert ==")
+    convert.convert(raw_dir)
 
 
 def main(argv: list[str] | None = None) -> int:
