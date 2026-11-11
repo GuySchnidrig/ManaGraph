@@ -1,0 +1,39 @@
+name: pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install
+        run: uv sync --locked
+
+      # Reuse earlier Scryfall downloads. The manifest makes the pipeline skip
+      # files that haven't changed, so Scryfall is hit at most once per update.
+      - name: Restore Scryfall downloads
+        uses: actions/cache@v6
+        with:
+          path: data/raw/scryfall
+          key: scryfall-${{ github.run_id }}
+          restore-keys: scryfall-
+
+      - name: Run pipeline
+        run: uv run managraph

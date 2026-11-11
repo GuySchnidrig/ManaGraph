@@ -51,4 +51,8 @@ Cheapest path: a JSON-LD `@context` over the bulk JSON, plus a small Python step
   - Before 1.0, `feat` bumps the minor version, `fix` bumps the patch, and `feat!` (breaking) bumps the minor.
   - Never hand-edit the version. It lives in `pyproject.toml`, `src/managraph/__init__.py` (the `x-release-please-version` line), `uv.lock` and `.release-please-manifest.json`, and Release Please updates all four.
 - Dependabot opens weekly grouped PRs for uv and GitHub Actions dependencies.
+- CI (`.github/workflows/pipeline.yml`) runs `uv sync --locked` and `uv run managraph` on every PR and push to `main`.
+  - Keep `uv.lock` in sync with `pyproject.toml`, or the install step fails.
+  - Scryfall downloads are cached between runs.
+  - When a pipeline step is added, CI covers it automatically.
 - Before publishing a dataset or endpoint, check the data source's license and the Wizards of the Coast Fan Content Policy. Card names and text are WotC IP.
