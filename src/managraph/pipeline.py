@@ -20,7 +20,10 @@ from pathlib import Path
 
 from managraph import download
 
-DEFAULT_TYPES = ("oracle_cards", "rulings")
+# oracle_cards holds one representative printing per card; default_cards has
+# every printing (English or the only language), needed for printing-level
+# fields like rarity, artist, frame and finishes.
+DEFAULT_TYPES = ("oracle_cards", "default_cards", "rulings")
 
 
 def run(

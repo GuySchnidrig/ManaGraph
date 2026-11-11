@@ -1,7 +1,17 @@
-# ManaGraph core ontology: cards, faces, printings and sets.
+# ManaGraph core ontology: classes and properties.
 #
-# Card types live in types.ttl and colors and mana in mana.ttl. Both share
-# this ontology's namespace.
+# The vocabularies these classes describe live in their own files:
+#
+#   types.ttl     card types, supertypes, subtypes   GENERATED from the CR
+#   keywords.ttl  keyword abilities, actions, words  GENERATED from the CR
+#   mana.ttl      colors and mana types
+#   vocab.ttl     formats, layouts, set types, rarities and the SKOS concept
+#                 schemes for printing attributes
+#
+# Classes and properties use the ontology namespace (mg:). Vocabulary
+# individuals get IRIs of their own under https://w3id.org/managraph/
+# (type/, keyword/, color/, format/, layout/, set-type/, rarity/, vocab/), minted by
+# managraph.iri.
 
 @prefix mg:      <https://w3id.org/managraph/ontology#> .
 @prefix owl:     <http://www.w3.org/2002/07/owl#> .
@@ -11,6 +21,8 @@
 @prefix dcterms: <http://purl.org/dc/terms/> .
 @prefix vann:    <http://purl.org/vocab/vann/> .
 @prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix cardtype: <https://w3id.org/managraph/type/card/> .
 
 # --- Ontology ---------------------------------------------------------------
 
@@ -57,8 +69,199 @@ mg:Set
     rdfs:label "Set"@en ;
     rdfs:comment "A Magic set or product line that contains mg:Printing nodes. IRI: https://w3id.org/managraph/set/{set_code}, from the lowercased set code (mg:setCode)."@en .
 
+mg:Illustration
+    a owl:Class ;
+    rdfs:label "Illustration"@en ;
+    rdfs:comment "A piece of card art, shared by every printing that reuses it (mg:hasIllustration). A double-faced printing has one per face. IRI: https://w3id.org/managraph/illustration/{illustration_id}, from the Scryfall illustration ID."@en .
+
+mg:Artist
+    a owl:Class ;
+    rdfs:subClassOf foaf:Person ;
+    rdfs:label "Artist"@en ;
+    rdfs:comment "An artist credited for an mg:Illustration. IRI: https://w3id.org/managraph/artist/{artist_id}, from the Scryfall artist ID."@en .
+
+mg:Ruling
+    a owl:Class ;
+    rdfs:label "Ruling"@en ;
+    rdfs:comment "An official ruling or Scryfall note on a card, from the Scryfall rulings bulk file. IRI: the card's IRI plus /ruling/{hash}, a hash of the date and text."@en .
+
+mg:Format
+    a owl:Class ;
+    rdfs:label "Format"@en ;
+    rdfs:comment "A play format with its own card pool, such as Standard or Commander. Individuals are in vocab.ttl, IRI https://w3id.org/managraph/format/{key}, from Scryfall's legalities keys."@en .
+
+mg:Layout
+    a owl:Class ;
+    rdfs:label "Layout"@en ;
+    rdfs:comment "How a card's faces are arranged, which tells how many mg:Face nodes it has. Individuals are in vocab.ttl, IRI https://w3id.org/managraph/layout/{key}, from Scryfall's layout values. Non-game layouts (art series, tokens, emblems, planes, schemes, vanguards, front cards) are left out of the graph."@en .
+
+mg:SetType
+    a owl:Class ;
+    rdfs:label "set type"@en ;
+    rdfs:comment "Kind of set: expansion, core, masters, commander, funny (Un-sets), promo, token and so on. Individuals are in vocab.ttl, IRI https://w3id.org/managraph/set-type/{key}, from Scryfall's set_type values."@en .
+
+mg:Rarity
+    a owl:Class ;
+    rdfs:label "Rarity"@en ;
+    rdfs:comment "Rarity of a printing. Individuals are in vocab.ttl, IRI https://w3id.org/managraph/rarity/{key}."@en .
+
 [] a owl:AllDisjointClasses ;
-    owl:members ( mg:Card mg:Face mg:Printing mg:Set ) .
+    owl:members ( mg:Card mg:Face mg:Printing mg:Set mg:Illustration mg:Artist
+                  mg:Ruling mg:Format mg:Layout mg:SetType mg:Rarity mg:Type
+                  mg:Keyword ) .
+
+# --- Types ------------------------------------------------------------------
+#
+# A face's type line as entities (CR 205). Every type is an individual of one
+# class below; types.ttl lists them all, generated from the CR. A face links
+# to each of its types, e.g. Dryad Arbor's face has both cardtype:Land and
+# cardtype:Creature, so card types are not disjoint.
+#
+# Subtype IRIs carry their category, since one name can belong to two
+# categories: type/artifact/Spacecraft and type/planar/Spacecraft.
+
+mg:Type
+    a owl:Class ;
+    rdfs:label "type"@en ;
+    rdfs:comment "Anything that appears on a type line: a card type, supertype or subtype (CR 205)."@en .
+
+mg:CardType
+    a owl:Class ;
+    rdfs:subClassOf mg:Type ;
+    rdfs:label "card type"@en ;
+    rdfs:comment "Artifact, Creature, Land and the other card types of CR 205.2a. IRI: https://w3id.org/managraph/type/card/{Name}."@en ;
+    mg:ruleSection "205.2" .
+
+mg:Supertype
+    a owl:Class ;
+    rdfs:subClassOf mg:Type ;
+    rdfs:label "supertype"@en ;
+    rdfs:comment "Basic, Legendary, Ongoing, Snow or World (CR 205.4a). IRI: https://w3id.org/managraph/type/super/{Name}."@en ;
+    mg:ruleSection "205.4" .
+
+mg:Subtype
+    a owl:Class ;
+    rdfs:subClassOf mg:Type ;
+    rdfs:label "subtype"@en ;
+    rdfs:comment "A subtype such as Elf, Equipment or Forest (CR 205.3). Each belongs to one of the subclasses below, and mg:subtypeOfCardType ties that subclass to the card types its subtypes go with (CR 205.3c-d). IRI: https://w3id.org/managraph/type/{category}/{Name}."@en ;
+    mg:ruleSection "205.3" .
+
+mg:ArtifactType a owl:Class ; rdfs:subClassOf mg:Subtype ;
+    rdfs:label "artifact type"@en ; mg:ruleSection "205.3g" ;
+    mg:subtypeOfCardType cardtype:Artifact .
+
+mg:EnchantmentType a owl:Class ; rdfs:subClassOf mg:Subtype ;
+    rdfs:label "enchantment type"@en ; mg:ruleSection "205.3h" ;
+    mg:subtypeOfCardType cardtype:Enchantment .
+
+mg:LandType a owl:Class ; rdfs:subClassOf mg:Subtype ;
+    rdfs:label "land type"@en ; mg:ruleSection "205.3i" ;
+    mg:subtypeOfCardType cardtype:Land .
+
+mg:BasicLandType a owl:Class ; rdfs:subClassOf mg:LandType ;
+    rdfs:label "basic land type"@en ;
+    rdfs:comment "Forest, Island, Mountain, Plains or Swamp. Having one doesn't make a land basic; the Basic supertype does (CR 205.4c)."@en ;
+    mg:ruleSection "205.3i" .
+
+mg:PlaneswalkerType a owl:Class ; rdfs:subClassOf mg:Subtype ;
+    rdfs:label "planeswalker type"@en ; mg:ruleSection "205.3j" ;
+    mg:subtypeOfCardType cardtype:Planeswalker .
+
+mg:SpellType a owl:Class ; rdfs:subClassOf mg:Subtype ;
+    rdfs:label "spell type"@en ; mg:ruleSection "205.3k" ;
+    mg:subtypeOfCardType cardtype:Instant, cardtype:Sorcery .
+
+mg:CreatureType a owl:Class ; rdfs:subClassOf mg:Subtype ;
+    rdfs:label "creature type"@en ; mg:ruleSection "205.3m" ;
+    mg:subtypeOfCardType cardtype:Creature, cardtype:Kindred .
+
+mg:PlanarType a owl:Class ; rdfs:subClassOf mg:Subtype ;
+    rdfs:label "planar type"@en ; mg:ruleSection "205.3n" ;
+    mg:subtypeOfCardType cardtype:Plane .
+
+mg:DungeonType a owl:Class ; rdfs:subClassOf mg:Subtype ;
+    rdfs:label "dungeon type"@en ; mg:ruleSection "205.3p" ;
+    mg:subtypeOfCardType cardtype:Dungeon .
+
+mg:BattleType a owl:Class ; rdfs:subClassOf mg:Subtype ;
+    rdfs:label "battle type"@en ; mg:ruleSection "205.3q" ;
+    mg:subtypeOfCardType cardtype:Battle .
+
+mg:UnType
+    a owl:Class ;
+    rdfs:subClassOf mg:Type ;
+    rdfs:label "Un type"@en ;
+    rdfs:comment "A word on a type line that is not a type in the Comprehensive Rules. Almost all come from Un-sets and playtest cards (Host, Cyborg, Donkey, Clamfolk, Summon), plus a few oddities like Stickers. Not part of types.ttl: the converter mints these from the data, IRI https://w3id.org/managraph/type/un/{Name}, linked with mg:hasType."@en .
+
+mg:hasType
+    a owl:ObjectProperty ;
+    rdfs:label "has type"@en ;
+    rdfs:comment "A type on the face's type line. Use the subproperties to ask for one kind."@en ;
+    rdfs:domain mg:Face ;
+    rdfs:range mg:Type .
+
+mg:hasCardType
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf mg:hasType ;
+    rdfs:label "has card type"@en ;
+    rdfs:range mg:CardType .
+
+mg:hasSupertype
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf mg:hasType ;
+    rdfs:label "has supertype"@en ;
+    rdfs:range mg:Supertype .
+
+mg:hasSubtype
+    a owl:ObjectProperty ;
+    rdfs:subPropertyOf mg:hasType ;
+    rdfs:label "has subtype"@en ;
+    rdfs:comment "A subtype of the face. Faces with changeling get every creature type through the axiom in types.ttl."@en ;
+    rdfs:range mg:Subtype .
+
+mg:subtypeOfCardType
+    a owl:AnnotationProperty ;
+    rdfs:label "subtype of card type"@en ;
+    rdfs:comment "Links a subtype category (e.g. mg:CreatureType) to the card types its subtypes go with (CR 205.3c-d). An annotation, since it relates a class to individuals; SHACL checks the data against it."@en .
+
+mg:ruleSection
+    a owl:AnnotationProperty ;
+    rdfs:label "rule section"@en ;
+    rdfs:comment "Number of the Comprehensive Rules section that defines this term, e.g. \"702.73\" for Changeling. See https://magic.wizards.com/en/rules."@en .
+
+# --- Keywords ---------------------------------------------------------------
+#
+# keywords.ttl lists every keyword in the CR (generated). Scryfall also tags
+# cards with terms the CR has no entry for: digital-only mechanics like
+# Conjure, variants like Swampwalk, token names like Treasure. The converter
+# mints those as plain mg:Keyword individuals without a mg:ruleSection.
+
+mg:Keyword
+    a owl:Class ;
+    rdfs:label "keyword"@en ;
+    rdfs:comment "A keyword ability, keyword action or ability word on a card. IRI: https://w3id.org/managraph/keyword/{name}, lowercased."@en .
+
+mg:KeywordAbility a owl:Class ; rdfs:subClassOf mg:Keyword ;
+    rdfs:label "keyword ability"@en ;
+    rdfs:comment "An ability with rules meaning, named by a keyword, e.g. Flying (CR 702)."@en ;
+    mg:ruleSection "702" .
+
+mg:KeywordAction a owl:Class ; rdfs:subClassOf mg:Keyword ;
+    rdfs:label "keyword action"@en ;
+    rdfs:comment "A verb with rules meaning, e.g. Scry (CR 701)."@en ;
+    mg:ruleSection "701" .
+
+mg:AbilityWord a owl:Class ; rdfs:subClassOf mg:Keyword ;
+    rdfs:label "ability word"@en ;
+    rdfs:comment "An italic word that groups similar abilities but has no rules meaning, e.g. Landfall (CR 207.2c)."@en ;
+    mg:ruleSection "207.2c" .
+
+mg:hasKeyword
+    a owl:ObjectProperty ;
+    rdfs:label "has keyword"@en ;
+    rdfs:comment "A keyword on the card, from Scryfall's keywords list. Scryfall gives keywords per card, not per face."@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range mg:Keyword .
 
 # --- Structure --------------------------------------------------------------
 
@@ -101,6 +304,12 @@ mg:inSet
     rdfs:domain mg:Printing ;
     rdfs:range mg:Set .
 
+mg:setType
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "set type"@en ;
+    rdfs:domain mg:Set ;
+    rdfs:range mg:SetType .
+
 # --- Identifiers ------------------------------------------------------------
 #
 # Each external ID appears twice: as a literal (below) for filtering and
@@ -138,6 +347,51 @@ mg:collectorNumber
     rdfs:domain mg:Printing ;
     rdfs:range xsd:string .
 
+mg:multiverseId
+    a owl:DatatypeProperty ;
+    rdfs:label "multiverse ID"@en ;
+    rdfs:comment "Gatherer multiverse ID. A printing can have several, one per face. Linked to Gatherer with skos:exactMatch."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range xsd:integer .
+
+mg:mtgoId
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "MTGO ID"@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range xsd:integer .
+
+mg:mtgoFoilId
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "MTGO foil ID"@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range xsd:integer .
+
+mg:arenaId
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "Arena ID"@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range xsd:integer .
+
+mg:tcgplayerId
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "TCGplayer ID"@en ;
+    rdfs:comment "TCGplayer product ID. Linked to the product page with skos:exactMatch."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range xsd:integer .
+
+mg:tcgplayerEtchedId
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "TCGplayer etched ID"@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range xsd:integer .
+
+mg:cardmarketId
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "Cardmarket ID"@en ;
+    rdfs:comment "Cardmarket product ID. Linked to the product page with skos:exactMatch."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range xsd:integer .
+
 # --- Names ------------------------------------------------------------------
 
 mg:name
@@ -154,6 +408,88 @@ mg:manaValue
     rdfs:comment "Mana value of the card as Scryfall gives it (formerly converted mana cost): the combined value for split cards, the front face's for double-faced cards. Decimal, because Un-cards have half mana."@en ;
     rdfs:domain mg:Card ;
     rdfs:range xsd:decimal .
+
+mg:layout
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "layout"@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range mg:Layout .
+
+mg:reserved
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "reserved"@en ;
+    rdfs:comment "True if the card is on the Reserved List, which Wizards has promised never to reprint."@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range xsd:boolean .
+
+mg:gameChanger
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "game changer"@en ;
+    rdfs:comment "True if the card is on the Commander Game Changers list, used for deck brackets."@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range xsd:boolean .
+
+# --- Legality ---------------------------------------------------------------
+#
+# One property per status, from Scryfall's legalities. "not_legal" is not
+# stated: a card with no legality link to a format is not legal in it.
+#   SELECT ?card WHERE { ?card mg:legalIn <https://w3id.org/managraph/format/commander> }
+
+mg:legalIn
+    a owl:ObjectProperty ;
+    rdfs:label "legal in"@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range mg:Format .
+
+mg:restrictedIn
+    a owl:ObjectProperty ;
+    rdfs:label "restricted in"@en ;
+    rdfs:comment "Scryfall's \"restricted\" status, which means different things per format. In Vintage, Timeless and Old School, a deck may hold only one copy. In commander formats (Duel Commander, Competitive Brawl, Tiny Leaders), the card may be in the deck but not be its commander."@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range mg:Format .
+
+mg:bannedIn
+    a owl:ObjectProperty ;
+    rdfs:label "banned in"@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range mg:Format .
+
+[] a owl:AllDisjointProperties ;
+    owl:members ( mg:legalIn mg:restrictedIn mg:bannedIn ) .
+
+# --- Rulings ----------------------------------------------------------------
+
+mg:hasRuling
+    a owl:ObjectProperty ;
+    rdfs:label "has ruling"@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range mg:Ruling ;
+    owl:inverseOf mg:rulingOn .
+
+mg:rulingOn
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "ruling on"@en ;
+    rdfs:domain mg:Ruling ;
+    rdfs:range mg:Card .
+
+mg:rulingText
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "ruling text"@en ;
+    rdfs:domain mg:Ruling ;
+    rdfs:range xsd:string .
+
+mg:publishedAt
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "published at"@en ;
+    rdfs:domain mg:Ruling ;
+    rdfs:range xsd:date .
+
+mg:rulingSource
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "ruling source"@en ;
+    rdfs:comment "\"wotc\" for official Wizards of the Coast rulings, \"scryfall\" for Scryfall's own notes."@en ;
+    rdfs:domain mg:Ruling ;
+    rdfs:range xsd:string .
 
 # --- Face characteristics ---------------------------------------------------
 #
@@ -212,3 +548,99 @@ mg:releasedAt
     a owl:DatatypeProperty ;
     rdfs:label "released at"@en ;
     rdfs:range xsd:date .
+
+mg:rarity
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "rarity"@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range mg:Rarity .
+
+mg:hasIllustration
+    a owl:ObjectProperty ;
+    rdfs:label "has illustration"@en ;
+    rdfs:comment "Art on the printing, one per face for double-faced printings."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range mg:Illustration .
+
+mg:illustratedBy
+    a owl:ObjectProperty ;
+    rdfs:label "illustrated by"@en ;
+    rdfs:domain mg:Illustration ;
+    rdfs:range mg:Artist .
+
+mg:illustrationId
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "illustration ID"@en ;
+    rdfs:domain mg:Illustration ;
+    rdfs:range xsd:string .
+
+mg:artistId
+    a owl:DatatypeProperty, owl:FunctionalProperty ;
+    rdfs:label "artist ID"@en ;
+    rdfs:domain mg:Artist ;
+    rdfs:range xsd:string .
+
+# --- Printing attributes (SKOS) ---------------------------------------------
+#
+# Physical and product attributes of a printing. Each value is a skos:Concept
+# in one of the concept schemes in vocab.ttl, IRI
+# https://w3id.org/managraph/vocab/{scheme}/{value}. vocab.ttl lists the
+# closed schemes in full. The open ones (frame_effect, promo_type,
+# watermark) grow with every set, so the converter mints their concepts
+# from the data.
+
+mg:game
+    a owl:ObjectProperty ;
+    rdfs:label "game"@en ;
+    rdfs:comment "Where the printing exists: paper, MTGO, Arena and so on. Concept scheme vocab/game."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range skos:Concept .
+
+mg:finish
+    a owl:ObjectProperty ;
+    rdfs:label "finish"@en ;
+    rdfs:comment "Nonfoil, foil or etched. Concept scheme vocab/finish."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range skos:Concept .
+
+mg:frame
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "frame"@en ;
+    rdfs:comment "Frame design, named by the year it was introduced. Concept scheme vocab/frame."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range skos:Concept .
+
+mg:frameEffect
+    a owl:ObjectProperty ;
+    rdfs:label "frame effect"@en ;
+    rdfs:comment "Frame treatment, e.g. showcase or extended art. Concept scheme vocab/frame_effect."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range skos:Concept .
+
+mg:borderColor
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "border color"@en ;
+    rdfs:comment "Concept scheme vocab/border_color."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range skos:Concept .
+
+mg:promoType
+    a owl:ObjectProperty ;
+    rdfs:label "promo type"@en ;
+    rdfs:comment "Kind of promo, e.g. prerelease or buy-a-box. Concept scheme vocab/promo_type."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range skos:Concept .
+
+mg:securityStamp
+    a owl:ObjectProperty, owl:FunctionalProperty ;
+    rdfs:label "security stamp"@en ;
+    rdfs:comment "Concept scheme vocab/security_stamp."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range skos:Concept .
+
+mg:watermark
+    a owl:ObjectProperty ;
+    rdfs:label "watermark"@en ;
+    rdfs:comment "Watermark in the text box, e.g. a guild symbol. Concept scheme vocab/watermark."@en ;
+    rdfs:domain mg:Printing ;
+    rdfs:range skos:Concept .

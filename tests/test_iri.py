@@ -86,3 +86,72 @@ def test_all_oracle_cards_mint():
             seen.add(card_iri)
             iri.printing(data["id"])
             iri.set_(data["set"])
+
+
+# --- vocabularies -----------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "name, expected",
+    [("Elf", "Elf"), ("Time Lord", "Time_Lord"), ("Urza’s", "Urzas"), ("Urza's", "Urzas"),
+     ("For Mirrodin!", "For_Mirrodin"), ("Power-Plant", "Power-Plant")],
+)
+def test_slug(name, expected):
+    assert iri.slug(name) == expected
+
+
+@pytest.mark.parametrize("name", ["", "  ", "!", None])
+def test_slug_rejects_empty(name):
+    with pytest.raises(ValueError):
+        iri.slug(name)
+
+
+def test_type_keeps_categories_apart():
+    assert iri.type_("artifact", "Spacecraft") == "https://w3id.org/managraph/type/artifact/Spacecraft"
+    assert iri.type_("planar", "Spacecraft") != iri.type_("artifact", "Spacecraft")
+
+
+def test_type_rejects_unknown_category():
+    with pytest.raises(ValueError):
+        iri.type_("tribal", "Elf")
+
+
+def test_keyword_is_lowercase():
+    assert iri.keyword("First strike") == "https://w3id.org/managraph/keyword/first_strike"
+    assert iri.keyword("First Strike") == iri.keyword("first strike")
+
+
+def test_color():
+    assert iri.color("w") == "https://w3id.org/managraph/color/W"
+    with pytest.raises(ValueError):
+        iri.color("X")
+
+
+@pytest.mark.parametrize("fn, key", [(iri.format_, "commander"), (iri.layout, "modal_dfc"), (iri.set_type, "token"), (iri.rarity, "mythic")])
+def test_keyed_vocabularies(fn, key):
+    assert fn(key).endswith("/" + key)
+    with pytest.raises(ValueError):
+        fn("Not A Key")
+
+
+def test_concept():
+    assert iri.concept("frame", "2015") == "https://w3id.org/managraph/vocab/frame/2015"
+    assert iri.concept("watermark", "d&d") == "https://w3id.org/managraph/vocab/watermark/d%26d"
+    with pytest.raises(ValueError):
+        iri.concept("price", "usd")
+
+
+def test_artist_and_illustration():
+    assert iri.artist(SCRYFALL_ID) == f"https://w3id.org/managraph/artist/{SCRYFALL_ID}"
+    assert iri.illustration(SCRYFALL_ID) == f"https://w3id.org/managraph/illustration/{SCRYFALL_ID}"
+
+
+def test_ruling_is_stable_and_text_sensitive():
+    a = iri.ruling(ORACLE_ID, "2021-03-19", "Some text.")
+    assert a == iri.ruling(ORACLE_ID, "2021-03-19", "Some text.")
+    assert a != iri.ruling(ORACLE_ID, "2021-03-19", "Other text.")
+    assert a.startswith(iri.card(ORACLE_ID) + "/ruling/")
+
+
+def test_un_type():
+    assert iri.type_("un", "Donkey") == "https://w3id.org/managraph/type/un/Donkey"

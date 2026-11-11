@@ -49,6 +49,10 @@ src/managraph/   Python package: download, pipeline
 data/            local downloads and generated RDF (gitignored)
 ```
 
+## Ontology
+
+The ontology lives in [`ontology/`](ontology/) as Turtle. To browse the core classes and properties as a diagram, open [`core.ttl` in WebVOWL](https://service.tib.eu/webvowl/#iri=https://raw.githubusercontent.com/GuySchnidrig/ManaGraph/refs/heads/main/ontology/core.ttl).
+
 ## Data & licensing
 
 - **Code and ontology:** the code, ontology, shapes and rules in this repository are licensed under the [MIT License](LICENSE).

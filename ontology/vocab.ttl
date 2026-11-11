@@ -1,0 +1,160 @@
+# ManaGraph vocabularies: formats, layouts, set types, rarities and printing
+# attributes.
+#
+# Keys follow Scryfall's values, so the converter maps them one to one.
+# Formats, layouts and rarities are OWL individuals. Printing attributes are
+# SKOS concept schemes. The closed schemes are listed in full here. Concepts
+# in the open schemes (frame_effect, promo_type, watermark) are minted by the
+# converter, with skos:inScheme and the Scryfall value as skos:prefLabel.
+
+@prefix mg:       <https://w3id.org/managraph/ontology#> .
+@prefix owl:      <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:     <http://www.w3.org/2004/02/skos/core#> .
+@prefix format:   <https://w3id.org/managraph/format/> .
+@prefix layout:   <https://w3id.org/managraph/layout/> .
+@prefix rarity:   <https://w3id.org/managraph/rarity/> .
+@prefix settype:  <https://w3id.org/managraph/set-type/> .
+@prefix vocab:    <https://w3id.org/managraph/vocab/> .
+@prefix game:     <https://w3id.org/managraph/vocab/game/> .
+@prefix finish:   <https://w3id.org/managraph/vocab/finish/> .
+@prefix frame:    <https://w3id.org/managraph/vocab/frame/> .
+@prefix border:   <https://w3id.org/managraph/vocab/border_color/> .
+@prefix stamp:    <https://w3id.org/managraph/vocab/security_stamp/> .
+
+# --- Formats ----------------------------------------------------------------
+#
+# The keys of Scryfall's legalities object.
+
+format:standard         a owl:NamedIndividual, mg:Format ; rdfs:label "Standard"@en .
+format:future           a owl:NamedIndividual, mg:Format ; rdfs:label "Future Standard"@en .
+format:pioneer          a owl:NamedIndividual, mg:Format ; rdfs:label "Pioneer"@en .
+format:modern           a owl:NamedIndividual, mg:Format ; rdfs:label "Modern"@en .
+format:legacy           a owl:NamedIndividual, mg:Format ; rdfs:label "Legacy"@en .
+format:vintage          a owl:NamedIndividual, mg:Format ; rdfs:label "Vintage"@en .
+format:pauper           a owl:NamedIndividual, mg:Format ; rdfs:label "Pauper"@en .
+format:premodern        a owl:NamedIndividual, mg:Format ; rdfs:label "Premodern"@en .
+format:oldschool        a owl:NamedIndividual, mg:Format ; rdfs:label "Old School"@en .
+format:penny            a owl:NamedIndividual, mg:Format ; rdfs:label "Penny Dreadful"@en .
+format:commander        a owl:NamedIndividual, mg:Format ; rdfs:label "Commander"@en .
+format:duel             a owl:NamedIndividual, mg:Format ; rdfs:label "Duel Commander"@en .
+format:paupercommander  a owl:NamedIndividual, mg:Format ; rdfs:label "Pauper Commander"@en .
+format:predh            a owl:NamedIndividual, mg:Format ; rdfs:label "PreDH"@en .
+format:oathbreaker      a owl:NamedIndividual, mg:Format ; rdfs:label "Oathbreaker"@en .
+format:alchemy          a owl:NamedIndividual, mg:Format ; rdfs:label "Alchemy"@en .
+format:historic         a owl:NamedIndividual, mg:Format ; rdfs:label "Historic"@en .
+format:timeless         a owl:NamedIndividual, mg:Format ; rdfs:label "Timeless"@en .
+format:gladiator        a owl:NamedIndividual, mg:Format ; rdfs:label "Gladiator"@en .
+format:brawl            a owl:NamedIndividual, mg:Format ; rdfs:label "Brawl"@en .
+format:standardbrawl    a owl:NamedIndividual, mg:Format ; rdfs:label "Standard Brawl"@en .
+format:competitivebrawl a owl:NamedIndividual, mg:Format ; rdfs:label "Competitive Brawl"@en .
+format:tlr              a owl:NamedIndividual, mg:Format ; rdfs:label "Tiny Leaders"@en ;
+    rdfs:comment "Scryfall key \"tlr\". Identified from the data, not from Scryfall docs: legal cards have mana value 3 or less, the ban list is Commander-like (Sol Ring, Mana Crypt) and the restricted cards (Nadu, Derevi, Rofellos) are banned as commander."@en .
+
+# --- Layouts ----------------------------------------------------------------
+#
+# Game layouts only. art_series, token, double_faced_token, emblem, planar,
+# scheme, vanguard and front_card cards are not loaded (managraph.scope).
+
+layout:normal          a owl:NamedIndividual, mg:Layout ; rdfs:label "normal"@en .
+layout:split           a owl:NamedIndividual, mg:Layout ; rdfs:label "split"@en .
+layout:flip            a owl:NamedIndividual, mg:Layout ; rdfs:label "flip"@en .
+layout:transform       a owl:NamedIndividual, mg:Layout ; rdfs:label "transform"@en .
+layout:modal_dfc       a owl:NamedIndividual, mg:Layout ; rdfs:label "modal double-faced"@en .
+layout:meld            a owl:NamedIndividual, mg:Layout ; rdfs:label "meld"@en .
+layout:leveler         a owl:NamedIndividual, mg:Layout ; rdfs:label "leveler"@en .
+layout:class           a owl:NamedIndividual, mg:Layout ; rdfs:label "class"@en .
+layout:case            a owl:NamedIndividual, mg:Layout ; rdfs:label "case"@en .
+layout:saga            a owl:NamedIndividual, mg:Layout ; rdfs:label "saga"@en .
+layout:adventure       a owl:NamedIndividual, mg:Layout ; rdfs:label "adventure"@en .
+layout:mutate          a owl:NamedIndividual, mg:Layout ; rdfs:label "mutate"@en .
+layout:prototype       a owl:NamedIndividual, mg:Layout ; rdfs:label "prototype"@en .
+layout:prepare         a owl:NamedIndividual, mg:Layout ; rdfs:label "prepare"@en .
+layout:host            a owl:NamedIndividual, mg:Layout ; rdfs:label "host"@en .
+layout:augment         a owl:NamedIndividual, mg:Layout ; rdfs:label "augment"@en .
+layout:reversible_card a owl:NamedIndividual, mg:Layout ; rdfs:label "reversible card"@en ;
+    rdfs:comment "A printing with a different card on each side. Each side has its own oracle ID."@en .
+
+# --- Set types --------------------------------------------------------------
+#
+# Scryfall's set_type values.
+
+settype:core             a owl:NamedIndividual, mg:SetType ; rdfs:label "core set"@en .
+settype:expansion        a owl:NamedIndividual, mg:SetType ; rdfs:label "expansion"@en .
+settype:masters          a owl:NamedIndividual, mg:SetType ; rdfs:label "masters set"@en ;
+    rdfs:comment "Reprint set for draft, e.g. Modern Masters."@en .
+settype:eternal          a owl:NamedIndividual, mg:SetType ; rdfs:label "eternal set"@en .
+settype:alchemy          a owl:NamedIndividual, mg:SetType ; rdfs:label "Alchemy"@en ;
+    rdfs:comment "Digital-only Arena cards."@en .
+settype:masterpiece      a owl:NamedIndividual, mg:SetType ; rdfs:label "masterpiece series"@en .
+settype:arsenal          a owl:NamedIndividual, mg:SetType ; rdfs:label "arsenal"@en .
+settype:from_the_vault   a owl:NamedIndividual, mg:SetType ; rdfs:label "From the Vault"@en .
+settype:spellbook        a owl:NamedIndividual, mg:SetType ; rdfs:label "spellbook"@en .
+settype:premium_deck     a owl:NamedIndividual, mg:SetType ; rdfs:label "premium deck"@en .
+settype:duel_deck        a owl:NamedIndividual, mg:SetType ; rdfs:label "duel deck"@en .
+settype:draft_innovation a owl:NamedIndividual, mg:SetType ; rdfs:label "draft innovation"@en ;
+    rdfs:comment "Special draft sets, e.g. Conspiracy or Modern Horizons."@en .
+settype:treasure_chest   a owl:NamedIndividual, mg:SetType ; rdfs:label "treasure chest"@en .
+settype:commander        a owl:NamedIndividual, mg:SetType ; rdfs:label "Commander"@en .
+settype:planechase       a owl:NamedIndividual, mg:SetType ; rdfs:label "Planechase"@en .
+settype:archenemy        a owl:NamedIndividual, mg:SetType ; rdfs:label "Archenemy"@en .
+settype:vanguard         a owl:NamedIndividual, mg:SetType ; rdfs:label "Vanguard"@en .
+settype:funny            a owl:NamedIndividual, mg:SetType ; rdfs:label "Un-set"@en ;
+    rdfs:comment "Humorous sets such as Unglued and Unfinity, and playtest cards."@en .
+settype:starter          a owl:NamedIndividual, mg:SetType ; rdfs:label "starter set"@en .
+settype:box              a owl:NamedIndividual, mg:SetType ; rdfs:label "box set"@en .
+settype:promo            a owl:NamedIndividual, mg:SetType ; rdfs:label "promo"@en .
+settype:token            a owl:NamedIndividual, mg:SetType ; rdfs:label "token set"@en ;
+    rdfs:comment "Tokens, emblems and inserts. Mostly holds cards the graph leaves out (see managraph.scope), so these sets can have few or no printings."@en .
+settype:memorabilia      a owl:NamedIndividual, mg:SetType ; rdfs:label "memorabilia"@en .
+settype:minigame         a owl:NamedIndividual, mg:SetType ; rdfs:label "minigame"@en .
+
+# --- Rarities ---------------------------------------------------------------
+
+rarity:common   a owl:NamedIndividual, mg:Rarity ; rdfs:label "common"@en .
+rarity:uncommon a owl:NamedIndividual, mg:Rarity ; rdfs:label "uncommon"@en .
+rarity:rare     a owl:NamedIndividual, mg:Rarity ; rdfs:label "rare"@en .
+rarity:mythic   a owl:NamedIndividual, mg:Rarity ; rdfs:label "mythic rare"@en .
+rarity:special  a owl:NamedIndividual, mg:Rarity ; rdfs:label "special"@en .
+rarity:bonus    a owl:NamedIndividual, mg:Rarity ; rdfs:label "bonus"@en .
+
+# --- Printing attributes: concept schemes -----------------------------------
+
+vocab:game           a skos:ConceptScheme ; rdfs:label "games"@en .
+vocab:finish         a skos:ConceptScheme ; rdfs:label "finishes"@en .
+vocab:frame          a skos:ConceptScheme ; rdfs:label "frames"@en .
+vocab:frame_effect   a skos:ConceptScheme ; rdfs:label "frame effects"@en .
+vocab:border_color   a skos:ConceptScheme ; rdfs:label "border colors"@en .
+vocab:promo_type     a skos:ConceptScheme ; rdfs:label "promo types"@en .
+vocab:security_stamp a skos:ConceptScheme ; rdfs:label "security stamps"@en .
+vocab:watermark      a skos:ConceptScheme ; rdfs:label "watermarks"@en .
+
+game:paper  a skos:Concept ; skos:inScheme vocab:game ; skos:prefLabel "paper"@en .
+game:mtgo   a skos:Concept ; skos:inScheme vocab:game ; skos:prefLabel "Magic Online"@en ; skos:notation "mtgo" .
+game:arena  a skos:Concept ; skos:inScheme vocab:game ; skos:prefLabel "MTG Arena"@en ; skos:notation "arena" .
+game:astral a skos:Concept ; skos:inScheme vocab:game ; skos:prefLabel "Astral"@en ; skos:notation "astral" .
+game:sega   a skos:Concept ; skos:inScheme vocab:game ; skos:prefLabel "Sega"@en ; skos:notation "sega" .
+
+finish:nonfoil a skos:Concept ; skos:inScheme vocab:finish ; skos:prefLabel "nonfoil"@en .
+finish:foil    a skos:Concept ; skos:inScheme vocab:finish ; skos:prefLabel "foil"@en .
+finish:etched  a skos:Concept ; skos:inScheme vocab:finish ; skos:prefLabel "etched"@en .
+
+frame:1993   a skos:Concept ; skos:inScheme vocab:frame ; skos:prefLabel "1993 frame"@en .
+frame:1997   a skos:Concept ; skos:inScheme vocab:frame ; skos:prefLabel "1997 frame"@en .
+frame:2003   a skos:Concept ; skos:inScheme vocab:frame ; skos:prefLabel "2003 frame"@en .
+frame:2015   a skos:Concept ; skos:inScheme vocab:frame ; skos:prefLabel "2015 frame"@en .
+frame:future a skos:Concept ; skos:inScheme vocab:frame ; skos:prefLabel "future frame"@en .
+
+border:black      a skos:Concept ; skos:inScheme vocab:border_color ; skos:prefLabel "black"@en .
+border:white      a skos:Concept ; skos:inScheme vocab:border_color ; skos:prefLabel "white"@en .
+border:borderless a skos:Concept ; skos:inScheme vocab:border_color ; skos:prefLabel "borderless"@en .
+border:silver     a skos:Concept ; skos:inScheme vocab:border_color ; skos:prefLabel "silver"@en .
+border:gold       a skos:Concept ; skos:inScheme vocab:border_color ; skos:prefLabel "gold"@en .
+border:yellow     a skos:Concept ; skos:inScheme vocab:border_color ; skos:prefLabel "yellow"@en .
+
+stamp:oval     a skos:Concept ; skos:inScheme vocab:security_stamp ; skos:prefLabel "oval"@en .
+stamp:triangle a skos:Concept ; skos:inScheme vocab:security_stamp ; skos:prefLabel "triangle"@en .
+stamp:acorn    a skos:Concept ; skos:inScheme vocab:security_stamp ; skos:prefLabel "acorn"@en .
+stamp:circle   a skos:Concept ; skos:inScheme vocab:security_stamp ; skos:prefLabel "circle"@en .
+stamp:arena    a skos:Concept ; skos:inScheme vocab:security_stamp ; skos:prefLabel "arena"@en .
+stamp:heart    a skos:Concept ; skos:inScheme vocab:security_stamp ; skos:prefLabel "heart"@en .

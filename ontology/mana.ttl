@@ -1,0 +1,90 @@
+# ManaGraph mana: colors and mana types.
+#
+# There are five colors (CR 105.1) and six types of mana: the five colors and
+# colorless (CR 106.1b). Colorless is a mana type, not a color, so color:C is
+# an mg:ManaType but not an mg:Color. A colorless object has no mg:color
+# links at all (CR 105.2).
+#
+# IRIs: https://w3id.org/managraph/color/{symbol}, by the mana symbol
+# Scryfall uses.
+
+@prefix mg:    <https://w3id.org/managraph/ontology#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix color: <https://w3id.org/managraph/color/> .
+
+# --- Classes ----------------------------------------------------------------
+
+mg:ManaType
+    a owl:Class ;
+    rdfs:label "mana type"@en ;
+    rdfs:comment "One of the six types of mana: white, blue, black, red, green or colorless."@en ;
+    mg:ruleSection "106.1b" .
+
+mg:Color
+    a owl:Class ;
+    rdfs:subClassOf mg:ManaType ;
+    rdfs:label "color"@en ;
+    rdfs:comment "One of the five colors: white, blue, black, red or green."@en ;
+    mg:ruleSection "105.1" .
+
+# --- Individuals ------------------------------------------------------------
+
+color:W a owl:NamedIndividual, mg:Color ;
+    rdfs:label "white"@en ;
+    skos:notation "W" .
+
+color:U a owl:NamedIndividual, mg:Color ;
+    rdfs:label "blue"@en ;
+    skos:notation "U" .
+
+color:B a owl:NamedIndividual, mg:Color ;
+    rdfs:label "black"@en ;
+    skos:notation "B" .
+
+color:R a owl:NamedIndividual, mg:Color ;
+    rdfs:label "red"@en ;
+    skos:notation "R" .
+
+color:G a owl:NamedIndividual, mg:Color ;
+    rdfs:label "green"@en ;
+    skos:notation "G" .
+
+color:C a owl:NamedIndividual, mg:ManaType ;
+    rdfs:label "colorless"@en ;
+    skos:notation "C" .
+
+[] a owl:AllDifferent ;
+    owl:distinctMembers ( color:W color:U color:B color:R color:G color:C ) .
+
+# --- Properties -------------------------------------------------------------
+
+mg:color
+    a owl:ObjectProperty ;
+    rdfs:label "color"@en ;
+    rdfs:comment "A color of the face, from its mana cost or color indicator (CR 202.2)."@en ;
+    rdfs:domain mg:Face ;
+    rdfs:range mg:Color .
+
+mg:colorIndicator
+    a owl:ObjectProperty ;
+    rdfs:label "color indicator"@en ;
+    rdfs:comment "A color shown by the face's color indicator, e.g. on the back face of a transforming card (CR 204)."@en ;
+    rdfs:domain mg:Face ;
+    rdfs:range mg:Color .
+
+mg:colorIdentity
+    a owl:ObjectProperty ;
+    rdfs:label "color identity"@en ;
+    rdfs:comment "A color in the card's color identity: the colors of all mana symbols in its costs and rules text plus its color indicators, across all faces (CR 903.4). Used for Commander deckbuilding."@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range mg:Color ;
+    mg:ruleSection "903.4" .
+
+mg:producesMana
+    a owl:ObjectProperty ;
+    rdfs:label "produces mana"@en ;
+    rdfs:comment "A type of mana the card can produce, from Scryfall's produced_mana."@en ;
+    rdfs:domain mg:Card ;
+    rdfs:range mg:ManaType .
