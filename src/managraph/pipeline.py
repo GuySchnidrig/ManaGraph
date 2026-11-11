@@ -6,8 +6,8 @@ Steps, in order:
 2. convert   - write N-Triples to data/rdf/ (``managraph.convert``)
 3. load      - build an Oxigraph store in store/ (``managraph.load``)
 4. infer     - write inferred triples to data/rdf/inferred.nt.gz (``managraph.infer``)
-
-SHACL validation gets added to ``run`` once it is implemented.
+5. validate  - check the graph against shapes/ with SHACL (``managraph.validate``);
+               reports problems, doesn't fail the build
 
 Usage::
 
@@ -20,7 +20,7 @@ from __future__ import annotations
 import argparse
 from pathlib import Path
 
-from managraph import convert, download, infer, load
+from managraph import convert, download, infer, load, validate
 
 # oracle_cards holds one representative printing per card; default_cards has
 # every printing (English or the only language), needed for printing-level
@@ -42,6 +42,9 @@ def run(
     store = load.load()
     print("== infer ==")
     infer.run(store)
+    del store  # free the Oxigraph store before rudof loads the graph
+    print("== validate ==")
+    validate.run()
 
 
 def main(argv: list[str] | None = None) -> int:
