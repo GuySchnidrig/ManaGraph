@@ -1,0 +1,26 @@
+# # /managraph/
+#
+# Permanent identifiers for ManaGraph, a linked data knowledge graph of
+# Magic: The Gathering cards: https://github.com/GuySchnidrig/ManaGraph
+#
+# - https://w3id.org/managraph/ontology is the ManaGraph ontology. RDF clients
+#   asking for Turtle get the Turtle file, everyone else the documentation.
+# - Everything else under https://w3id.org/managraph/ redirects to the
+#   project site at https://guyschnidrig.github.io/ManaGraph/
+#
+# ## Contact
+# This space is administered by:
+#
+# GitHub username: GuySchnidrig
+
+RewriteEngine on
+
+# Ontology as Turtle
+RewriteCond %{HTTP_ACCEPT} text/turtle
+RewriteRule ^ontology/?$ https://guyschnidrig.github.io/ManaGraph/ontology/managraph.ttl [R=303,L]
+
+# Ontology documentation, the default for browsers and other clients
+RewriteRule ^ontology/?$ https://guyschnidrig.github.io/ManaGraph/ontology/ [R=303,L]
+
+# Everything else
+RewriteRule ^(.*)$ https://guyschnidrig.github.io/ManaGraph/$1 [R=302,L]

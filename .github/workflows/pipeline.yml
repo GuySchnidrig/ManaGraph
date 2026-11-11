@@ -37,3 +37,6 @@ jobs:
 
       - name: Run pipeline
         run: uv run managraph
+
+      - name: Test
+        run: uv run pytest
