@@ -11,42 +11,89 @@ A linked data knowledge graph of Magic: The Gathering cards, built from Scryfall
 
 The JSON files and APIs from Scryfall are great for looking up cards. ManaGraph adds what they can't do: arbitrary joins, aggregations and property-path queries across cards, printings, rulings and external identifiers, on top of an ontology of Magic's type system.
 
-> **Status:** early development. So far only the download step exists.
+> **Status:** early development. The full build runs end to end (about 35,000 cards, 4.5 million triples), but there is no public endpoint yet.
 
 ## Setup
 
-Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/). Serving with QLever also needs Docker.
 
 ```sh
 uv sync
 ```
 
-## Usage
-
-Run the pipeline:
+## Build the graph
 
 ```sh
-uv run managraph                                 # oracle_cards + rulings
-uv run managraph --types oracle_cards --force    # pick types, force re-download
+uv run managraph
 ```
 
-Download individual Scryfall bulk files:
+This runs the whole pipeline in about 3 minutes and needs about 9 GB of memory at its peak, during validation:
+
+| Step | What it does | Output |
+|---|---|---|
+| download | Fetches the Scryfall bulk files `oracle_cards`, `default_cards` and `rulings`, skipping unchanged ones | `data/raw/scryfall/` |
+| convert | Turns cards, faces, printings, sets, art and rulings into RDF, leaving out non-game cards (tokens, art cards, planes, ...) | `data/rdf/*.nt.gz` |
+| load | Loads the ontology and the data into a local Oxigraph store | `store/` |
+| infer | Adds the triples a reasoner would derive (subclasses, subproperties, Changeling), since QLever doesn't reason | `data/rdf/inferred.nt.gz` |
+| validate | Checks the graph against the SHACL shapes with [rudof](https://rudof-project.github.io/); fails on violations, reports warnings | `data/reports/shacl.ttl` |
+| export | Writes the full graph as one file for QLever | `qlever/managraph.nt.gz` |
+
+Each step can also run on its own, e.g. `uv run python -m managraph.validate`. Nothing under `data/`, `store/` or `qlever/` is committed except the Qleverfile.
+
+The type and keyword vocabularies are generated from the [Comprehensive Rules](https://magic.wizards.com/en/rules). After a rules update, regenerate them:
 
 ```sh
-uv run python -m managraph.download --list       # available types and sizes
-uv run python -m managraph.download rulings
+uv run python -m managraph.rules
 ```
 
-Bulk files are saved as gzipped JSON Lines in `data/raw/scryfall/` and skipped when unchanged. They are not committed to the repository.
+## Query it
+
+Serve the graph with [QLever](https://github.com/ad-freiburg/qlever):
+
+```sh
+cd qlever
+uvx qlever index     # build the index from managraph.nt.gz
+uvx qlever start     # SPARQL endpoint on http://localhost:7019
+uvx qlever ui        # optional web UI on http://localhost:8176
+```
+
+[`queries/`](queries/) has example queries in plain SPARQL 1.1:
+
+| Query | Shows |
+|---|---|
+| [`changeling-elves.rq`](queries/changeling-elves.rq) | Commander-legal Elves, Changelings included through inference |
+| [`land-creatures.rq`](queries/land-creatures.rq) | Faces with two card types, like Dryad Arbor |
+| [`creature-types.rq`](queries/creature-types.rq) | The most common creature types |
+| [`most-reprinted.rq`](queries/most-reprinted.rq) | Cards with the most printings and sets |
+| [`reserved-list-in-vintage.rq`](queries/reserved-list-in-vintage.rq) | Reserved List cards banned or restricted in Vintage |
+| [`prolific-artists.rq`](queries/prolific-artists.rq) | Artists with the most illustrations |
+| [`commander-bans-by-color.rq`](queries/commander-bans-by-color.rq) | Commander bans by number of colors in the identity |
+| [`rulings-per-keyword.rq`](queries/rulings-per-keyword.rq) | Keyword abilities with the most rulings, linked to their rule number |
+
+Example: every Commander-legal Elf, Changelings included:
+
+```sparql
+PREFIX mg:       <https://w3id.org/managraph/ontology#>
+PREFIX creature: <https://w3id.org/managraph/type/creature/>
+PREFIX format:   <https://w3id.org/managraph/format/>
+
+SELECT ?name WHERE {
+  ?card mg:legalIn format:commander ;
+        mg:hasFace/mg:hasSubtype creature:Elf ;
+        mg:name ?name .
+}
+```
 
 ## Project layout
 
 ```
-ontology/        OWL/RDFS ontology (Turtle): core, card types, mana
+ontology/        OWL ontology (Turtle): core classes and properties, mana, vocabularies;
+                 types.ttl and keywords.ttl are generated from the Comprehensive Rules
 shapes/          SHACL shapes for data validation
-rules/           inference/CONSTRUCT rules
-src/managraph/   Python package: download, pipeline
-data/            local downloads and generated RDF (gitignored)
+queries/         example SPARQL queries
+qlever/          Qleverfile (index files are gitignored)
+src/managraph/   Python package: download, rules, convert, load, infer, validate, export
+data/            downloads, generated RDF and reports (gitignored)
 ```
 
 ## Ontology
