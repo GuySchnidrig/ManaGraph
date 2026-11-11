@@ -14,5 +14,8 @@ jobs:
     steps:
       - uses: googleapis/release-please-action@v4
         with:
+          # A PAT makes the release PR trigger the pipeline check normally.
+          # With the default GITHUB_TOKEN, GitHub holds those runs for manual approval.
+          token: ${{ secrets.MANAGRAPH_RELEASE_PLEASE_TOKEN || github.token }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
