@@ -34,7 +34,7 @@
     dcterms:license <https://spdx.org/licenses/MIT> ;
     dcterms:source <https://scryfall.com/docs/api/bulk-data> ;
     rdfs:seeAlso <https://github.com/GuySchnidrig/ManaGraph> ;
-    owl:versionInfo "0.2.0" ; # x-release-please-version
+    owl:versionInfo "0.3.0" ; # x-release-please-version
     vann:preferredNamespacePrefix "mg" ;
     vann:preferredNamespaceUri "https://w3id.org/managraph/ontology#" .
 

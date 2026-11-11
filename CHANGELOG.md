@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.3.0](https://github.com/GuySchnidrig/ManaGraph/compare/v0.2.0...v0.3.0) (2026-11-11)
+
+
+### Features
+
+* add ontology vocabularies for formats, layouts, set types, rarities, and printing attributes ([172c981](https://github.com/GuySchnidrig/ManaGraph/commit/172c98163f96ffa55ae2fb12681aa3b978949db8))
+* add rule-based inference step ([233ffcc](https://github.com/GuySchnidrig/ManaGraph/commit/233ffccb0c78b4a8a4b94db0db4dcfbde3ca36fe))
+* build, validate and serve the RDF graph ([6c84194](https://github.com/GuySchnidrig/ManaGraph/commit/6c84194b28d32377872c3ecb8f0e350b0b48f90e))
+* convert Scryfall bulk data to RDF ([feccb0b](https://github.com/GuySchnidrig/ManaGraph/commit/feccb0b41ab930703e942c7db890740d7169f4ca))
+* export the graph for QLever and add example queries ([ef3b66d](https://github.com/GuySchnidrig/ManaGraph/commit/ef3b66d92280502d74f08aaa6372048c8e94048e))
+* validate the graph with SHACL shapes ([f734afd](https://github.com/GuySchnidrig/ManaGraph/commit/f734afdeaad701ea61d8d1fb38f4eae58819a7de))
+
+
+### Documentation
+
+* describe the pipeline and querying in the README ([fccfd80](https://github.com/GuySchnidrig/ManaGraph/commit/fccfd80efc5cfd2f285369483631ac82d40bb683))
+
 ## [0.2.0](https://github.com/GuySchnidrig/ManaGraph/compare/v0.1.0...v0.2.0) (2026-11-11)
 
 
