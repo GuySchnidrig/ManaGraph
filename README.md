@@ -1,5 +1,12 @@
 # ManaGraph
 
+[![pipeline](https://github.com/GuySchnidrig/ManaGraph/actions/workflows/pipeline.yml/badge.svg?branch=main)](https://github.com/GuySchnidrig/ManaGraph/actions/workflows/pipeline.yml)
+[![release](https://img.shields.io/github/v/release/GuySchnidrig/ManaGraph)](https://github.com/GuySchnidrig/ManaGraph/releases)
+[![Python](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2FGuySchnidrig%2FManaGraph%2Fmain%2Fpyproject.toml)](pyproject.toml)
+[![uv](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/uv/main/assets/badge/v0.json)](https://github.com/astral-sh/uv)
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-fe5196?logo=conventionalcommits&logoColor=white)](https://www.conventionalcommits.org)
+[![License: MIT](https://img.shields.io/github/license/GuySchnidrig/ManaGraph)](LICENSE)
+
 A linked data knowledge graph of Magic: The Gathering cards, built from Scryfall data and queryable with SPARQL.
 
 The JSON files and APIs from Scryfall are great for looking up cards. ManaGraph adds what they can't do: arbitrary joins, aggregations and property-path queries across cards, printings, rulings and external identifiers, on top of an ontology of Magic's type system.
