@@ -1,10 +1,14 @@
 # Qleverfile for ManaGraph, for use with https://github.com/ad-freiburg/qlever-control
 #
-#   uv run managraph               # builds the graph, writes qlever/managraph.nt.gz
+#   uv run managraph                   # builds the graph, writes qlever/managraph.nt.gz
 #   cd qlever
-#   uvx qlever index               # build the index (needs Docker)
-#   uvx qlever start               # SPARQL endpoint on http://localhost:7019
-#   uvx qlever ui                  # optional web UI on http://localhost:8176
+#   uvx --python 3.12 qlever index     # build the index (needs Docker)
+#   uvx --python 3.12 qlever start     # SPARQL endpoint on http://localhost:7019
+#   uvx --python 3.12 qlever ui        # optional web UI on http://localhost:8176
+#
+# The qlever CLI needs Python 3.12+ (hence --python, in case an older Python
+# such as Anaconda's is active) and generates Linux shell commands for
+# Docker: on Windows, run it inside WSL2.
 #
 # Everything else in this folder (index files, logs) is gitignored.
 # QLever does no reasoning: the pipeline has already added the inferred

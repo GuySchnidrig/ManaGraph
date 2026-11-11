@@ -48,13 +48,13 @@ uv run python -m managraph.rules
 
 ## Query it
 
-Serve the graph with [QLever](https://github.com/ad-freiburg/qlever):
+Serve the graph with [QLever](https://github.com/ad-freiburg/qlever). The `qlever` command line tool needs Python 3.12 or later and runs QLever in Docker, so it works on Linux and macOS. On Windows, run it inside WSL2 with Docker, since it generates Linux shell commands.
 
 ```sh
 cd qlever
-uvx qlever index     # build the index from managraph.nt.gz
-uvx qlever start     # SPARQL endpoint on http://localhost:7019
-uvx qlever ui        # optional web UI on http://localhost:8176
+uvx --python 3.12 qlever index     # build the index from managraph.nt.gz (first)
+uvx --python 3.12 qlever start     # SPARQL endpoint on http://localhost:7019
+uvx --python 3.12 qlever ui        # optional web UI on http://localhost:8176
 ```
 
 [`queries/`](queries/) has example queries in plain SPARQL 1.1:
