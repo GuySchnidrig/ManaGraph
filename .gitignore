@@ -218,3 +218,13 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ManaGraph
+# Raw bulk downloads (Scryfall / MTGJSON) and generated RDF output
+data/*
+!data/.gitkeep
+# Raw downloads at any depth (e.g. when the downloader is run from a subfolder)
+**/data/raw/
+# Local Oxigraph stores
+*.oxigraph/
+store/
