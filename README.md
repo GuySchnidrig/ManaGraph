@@ -57,6 +57,14 @@ uvx --python 3.12 qlever start     # SPARQL endpoint on http://localhost:7019
 uvx --python 3.12 qlever ui        # optional web UI on http://localhost:8176
 ```
 
+To try queries without QLever or Docker, run them against the local Oxigraph store that the build leaves in `store/`. It holds the inferred triples too, and common prefixes such as `mg:` and `creature:` are added for you:
+
+```sh
+uv run python -m managraph.query queries/most-reprinted.rq                 # a query file
+uv run python -m managraph.query "SELECT ?t WHERE { ?c mg:name 'Dryad Arbor' ; a ?t }"
+uv run python -m managraph.query                                           # interactive
+```
+
 [`queries/`](queries/) has example queries in plain SPARQL 1.1:
 
 | Query | Shows |
