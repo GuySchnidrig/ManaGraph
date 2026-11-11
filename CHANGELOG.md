@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.1](https://github.com/GuySchnidrig/ManaGraph/compare/v0.4.0...v0.4.1) (2026-11-11)
+
+
+### Documentation
+
+* note QLever CLI needs Python 3.12+ and Linux or WSL2 ([95a2dad](https://github.com/GuySchnidrig/ManaGraph/commit/95a2dad17d77289749c7a6fa2ca4745578c62580))
+* note QLever CLI needs Python 3.12+ and Linux or WSL2 ([4f907c6](https://github.com/GuySchnidrig/ManaGraph/commit/4f907c642d3abc8a0c76f78a8c2461389190bc6c))
+
 ## [0.4.0](https://github.com/GuySchnidrig/ManaGraph/compare/v0.3.0...v0.4.0) (2026-11-11)
 
 
