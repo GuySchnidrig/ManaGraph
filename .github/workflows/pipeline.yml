@@ -40,3 +40,35 @@ jobs:
 
       - name: Test
         run: uv run pytest
+
+      # Smoke test for serving: build a QLever index from the exported graph,
+      # start the server and run every example query against it. The runner
+      # has Docker; the qlever CLI pulls the QLever image.
+      - name: Build QLever index
+        working-directory: qlever
+        run: uvx --from qlever==0.6.0 qlever index
+
+      - name: Start QLever
+        working-directory: qlever
+        run: uvx --from qlever==0.6.0 qlever start
+
+      - name: Run example queries on QLever
+        run: |
+          set -euo pipefail
+          for query in queries/*.rq; do
+            curl --silent --show-error --fail --max-time 120 \
+              --header "Accept: text/csv" --data-urlencode "query@${query}" \
+              --output result.csv http://localhost:7019
+            rows=$(($(wc -l < result.csv) - 1))
+            echo "${query}: ${rows} rows"
+            head -n 4 result.csv
+            if [ "${rows}" -lt 1 ]; then
+              echo "::error file=${query}::query returned no rows"
+              exit 1
+            fi
+          done
+
+      - name: QLever log
+        if: failure()
+        working-directory: qlever
+        run: tail -n 50 managraph.index-log.txt managraph.server-log.txt 2>/dev/null || true
