@@ -1,0 +1,56 @@
+name: pages
+
+# Publishes the ontology documentation and Turtle file to GitHub Pages,
+# https://guyschnidrig.github.io/ManaGraph/, which the w3id.org/managraph
+# redirects point to. No card data is published.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ontology/**"
+      - "queries/**"
+      - "src/managraph/docs.py"
+      - ".github/workflows/pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v7
+        with:
+          enable-cache: true
+
+      - name: Install
+        run: uv sync --locked
+
+      - name: Build site
+        run: uv run python -m managraph.docs --out site
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

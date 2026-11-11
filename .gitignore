@@ -231,3 +231,6 @@ store/
 # Local QLever indexes
 qlever/*
 !qlever/Qleverfile
+
+# GitHub Pages build output (managraph.docs)
+site/
