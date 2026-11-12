@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/GuySchnidrig/ManaGraph/compare/v0.5.0...v0.6.0) (2026-11-12)
+
+
+### Features
+
+* add deployment for a public QLever endpoint ([c9cdbfe](https://github.com/GuySchnidrig/ManaGraph/commit/c9cdbfedc09e1d72adbb6f93f7f5f97257b7ea99))
+
 ## [0.5.0](https://github.com/GuySchnidrig/ManaGraph/compare/v0.4.1...v0.5.0) (2026-11-12)
 
 
