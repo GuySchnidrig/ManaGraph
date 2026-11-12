@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/GuySchnidrig/ManaGraph/compare/v0.4.1...v0.5.0) (2026-11-12)
+
+
+### Features
+
+* add local Oxigraph query execution support ([41bb66e](https://github.com/GuySchnidrig/ManaGraph/commit/41bb66e72bea77b92b92d451b997c27d856b3c51))
+* add local Oxigraph query execution support ([0112044](https://github.com/GuySchnidrig/ManaGraph/commit/0112044d0f8d36531cc0c1d98e293af48043925e))
+
 ## [0.4.1](https://github.com/GuySchnidrig/ManaGraph/compare/v0.4.0...v0.4.1) (2026-11-11)
 
 
