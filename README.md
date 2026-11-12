@@ -65,6 +65,8 @@ uv run python -m managraph.query "SELECT ?t WHERE { ?c mg:name 'Dryad Arbor' ; a
 uv run python -m managraph.query                                           # interactive
 ```
 
+To run a public endpoint on a server, with HTTPS and a weekly rebuild, see [`deploy/`](deploy/README.md). It is set up for Oracle Cloud's Always Free tier.
+
 [`queries/`](queries/) has example queries in plain SPARQL 1.1:
 
 | Query | Shows |
@@ -113,5 +115,5 @@ To browse the core classes and properties as a diagram, open [`core.ttl` in WebV
 ## Data & licensing
 
 - **Code and ontology:** the code, ontology, shapes and rules in this repository are licensed under the [MIT License](LICENSE).
-- **Card data:** this repository contains no card data. The pipeline downloads it from [Scryfall](https://scryfall.com), and its use is subject to [Scryfall's API terms](https://scryfall.com/docs/api). The MIT License does not apply to it. ManaGraph is not affiliated with or endorsed by Scryfall.
+- **Card data:** this repository contains no card data. The pipeline downloads it from [Scryfall](https://scryfall.com), and its use is subject to [Scryfall's API terms](https://scryfall.com/docs/api). The MIT License does not apply to it, nor to the data a ManaGraph SPARQL endpoint serves, which is derived from Scryfall data and free to query without an account. ManaGraph is not affiliated with or endorsed by Scryfall.
 - **Wizards of the Coast:** ManaGraph is unofficial Fan Content permitted under the [Fan Content Policy](https://company.wizards.com/en/legal/fancontentpolicy). Not approved/endorsed by Wizards. Portions of the materials used are property of Wizards of the Coast. ©Wizards of the Coast LLC.

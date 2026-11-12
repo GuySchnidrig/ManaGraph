@@ -1,0 +1,6 @@
+# HTTPS in front of QLever. SITE is the host name (set by setup.sh); Caddy
+# gets a Let's Encrypt certificate for it automatically.
+{$SITE} {
+	encode gzip
+	reverse_proxy localhost:7019
+}
