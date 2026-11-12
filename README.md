@@ -65,7 +65,7 @@ uv run python -m managraph.query "SELECT ?t WHERE { ?c mg:name 'Dryad Arbor' ; a
 uv run python -m managraph.query                                           # interactive
 ```
 
-To run a public endpoint on a server, with HTTPS and a weekly rebuild, see [`deploy/`](deploy/README.md). It is set up for Oracle Cloud's Always Free tier.
+To run a public endpoint on a server, with HTTPS and a weekly rebuild, see [`deploy/`](deploy/README.md). It covers a home server on Tailscale and Oracle Cloud's Always Free tier.
 
 [`queries/`](queries/) has example queries in plain SPARQL 1.1:
 
