@@ -28,6 +28,7 @@ import html
 import shutil
 from collections import defaultdict
 from pathlib import Path
+from urllib.parse import quote
 
 import pyoxigraph as ox
 
@@ -35,6 +36,14 @@ from managraph import __version__, convert, download, iri
 
 DEFAULT_OUT = download.PROJECT_ROOT / "site"
 REPO = "https://github.com/GuySchnidrig/ManaGraph"
+# The public SPARQL endpoint (a proof of concept on a home server, see deploy/).
+ENDPOINT = "https://homelab.taila88e34.ts.net/"
+YASGUI = "https://yasgui.triply.cc/"
+
+
+def yasgui_link(query: str) -> str:
+    """A YASGUI editor link that opens ``query`` against the ManaGraph endpoint."""
+    return f"{YASGUI}#query={quote(query)}&endpoint={quote(ENDPOINT, safe='')}&requestMethod=POST"
 
 RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#"
 RDFS = "http://www.w3.org/2000/01/rdf-schema#"
@@ -364,9 +373,10 @@ def ontology_page(onto: Ontology) -> tuple[str, set[str]]:
 NOT_FOUND = """<h1>ManaGraph identifier</h1>
 <p id="what">This address is not a page on this site.</p>
 <div id="data" hidden>
-  <p>It is an identifier in the ManaGraph knowledge graph. ManaGraph doesn't publish card data as files;
-  build the graph with the <a href="REPO">pipeline</a> and look it up with SPARQL:</p>
+  <p>It is an identifier in the ManaGraph knowledge graph. Look it up on the
+  <a href="ENDPOINT_URL">ManaGraph SPARQL endpoint</a>:</p>
   <pre id="query"></pre>
+  <p><a id="yasgui">Run it in YASGUI</a> · <a id="turtle">Result as Turtle</a></p>
   <p id="scryfall"></p>
 </div>
 <p><a href="BASE">ManaGraph home</a> · <a href="BASEontology/">Ontology documentation</a></p>
@@ -383,7 +393,12 @@ NOT_FOUND = """<h1>ManaGraph identifier</h1>
   if (["card", "printing", "set", "artist", "illustration"].indexOf(kind) < 0) return;
   var id = "https://w3id.org/managraph/" + path;
   document.getElementById("what").textContent = "<" + id + ">";
-  document.getElementById("query").textContent = "DESCRIBE <" + id + ">";
+  var query = "DESCRIBE <" + id + ">";
+  var endpoint = "ENDPOINT_URL";
+  document.getElementById("query").textContent = query;
+  document.getElementById("turtle").href = endpoint + "?query=" + encodeURIComponent(query);
+  document.getElementById("yasgui").href = "YASGUI_URL#query=" + encodeURIComponent(query) +
+    "&endpoint=" + encodeURIComponent(endpoint) + "&requestMethod=POST";
   var m = path.match(/^card\\/([0-9a-f-]{36})/);
   var p = path.match(/^printing\\/([0-9a-f-]{36})/);
   var s = document.getElementById("scryfall");
@@ -410,10 +425,13 @@ rulings and identifiers, on an ontology of Magic's type system.</p>
     <a href="ontology/managraph.ttl">Turtle</a></li>
 <li><a href="{REPO}">Source, pipeline and example queries on GitHub</a></li>
 </ul>
-<p>There is no public SPARQL endpoint yet. Build the graph and serve it yourself with
-<code>uv run managraph</code> and QLever; see the README.</p>
+<h2>Query it</h2>
+<p>SPARQL endpoint: <a href="{ENDPOINT}"><code>{ENDPOINT}</code></a>. It is a proof of concept on a
+home server, rebuilt weekly from Scryfall data, without uptime guarantees. Open it in a SPARQL editor such
+as <a href="{YASGUI}">YASGUI</a>, or build the graph and serve it yourself; see the README.</p>
 <h2>Example</h2>
-<pre>{e(query)}</pre>""", "ManaGraph: a SPARQL knowledge graph of Magic: The Gathering cards")
+<pre>{e(query)}</pre>
+<p><a href="{e(yasgui_link(query))}">Run this query in YASGUI</a></p>""", "ManaGraph: a SPARQL knowledge graph of Magic: The Gathering cards")
 
 
 def build(out_dir: Path = DEFAULT_OUT, ontology_dir: Path = convert.ONTOLOGY_DIR) -> set[str]:
@@ -427,7 +445,8 @@ def build(out_dir: Path = DEFAULT_OUT, ontology_dir: Path = convert.ONTOLOGY_DIR
     ontology_html, anchors = ontology_page(onto)
     (out_dir / "ontology" / "index.html").write_text(ontology_html, encoding="utf-8")
     (out_dir / "index.html").write_text(home_page(onto), encoding="utf-8")
-    not_found = NOT_FOUND.replace("REPO", REPO).replace("BASE", PAGES_BASE)
+    not_found = (NOT_FOUND.replace("ENDPOINT_URL", ENDPOINT).replace("YASGUI_URL", YASGUI)
+                 .replace("REPO", REPO).replace("BASE", PAGES_BASE))
     (out_dir / "404.html").write_text(page("ManaGraph identifier", not_found), encoding="utf-8")
     (out_dir / ".nojekyll").write_text("", encoding="utf-8")
     print(f"docs: site written to {out_dir} ({len(anchors)} anchors)")
