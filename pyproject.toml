@@ -1,6 +1,6 @@
 [project]
 name = "managraph"
-version = "0.6.0"
+version = "0.6.1"
 description = "A linked data knowledge graph of Magic: The Gathering cards, queryable via SPARQL."
 readme = "README.md"
 license = "MIT"
