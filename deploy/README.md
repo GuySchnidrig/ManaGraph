@@ -26,7 +26,10 @@ an arm64 image).
    Always Free resources are not charged.
 2. **Compute → Instances → Create instance**
    - Image: **Canonical Ubuntu 24.04**
-   - Shape: **Ampere → VM.Standard.A1.Flex**, 4 OCPUs, 24 GB memory
+   - Shape: **Ampere → VM.Standard.A1.Flex**, 4 OCPUs and 24 GB memory, or
+     2 OCPUs and 12 GB, which gets capacity more often and is enough (the
+     setup adds 8 GB swap for the rebuild peak). Resize later with
+     **Stop → Edit → Shape**.
    - Boot volume: 100 GB (Always Free covers 200 GB in total)
    - Add your SSH public key.
    - If creation fails with "Out of capacity", try another availability

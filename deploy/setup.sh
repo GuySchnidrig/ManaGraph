@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # One-time setup of a public ManaGraph SPARQL endpoint on a fresh Ubuntu server
 # (written for Oracle Cloud Always Free, Ampere A1, Ubuntu 24.04; works on any
-# Ubuntu host with ~12 GB RAM, since the pipeline peaks at ~9 GB).
+# Ubuntu host with 12 GB RAM or more, since the pipeline peaks at ~9 GB; an
+# 8 GB swap file covers the peak while QLever is serving).
 #
 #   curl -fsSL https://raw.githubusercontent.com/GuySchnidrig/ManaGraph/main/deploy/setup.sh | bash
 #   # or, with your own domain pointing at the server:
@@ -27,6 +28,17 @@ sudo apt-get install -yq docker.io git curl iptables-persistent
 sudo usermod -aG docker "$USER"
 command -v uv >/dev/null || curl -LsSf https://astral.sh/uv/install.sh | sh
 export PATH="$HOME/.local/bin:$PATH"
+
+echo "== swap =="
+# Headroom for the rebuild: the pipeline peaks at ~9 GB while QLever keeps
+# serving, which can exceed RAM on a 12 GB instance.
+if ! swapon --show | grep -q .; then
+  sudo fallocate -l 8G /swapfile
+  sudo chmod 600 /swapfile
+  sudo mkswap /swapfile
+  sudo swapon /swapfile
+  echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab >/dev/null
+fi
 
 echo "== firewall =="
 # Oracle's Ubuntu images reject everything but SSH in iptables, on top of the

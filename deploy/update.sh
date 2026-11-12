@@ -19,4 +19,7 @@ uv run managraph
 cd qlever
 "${QLEVER[@]}" stop || true
 "${QLEVER[@]}" index --overwrite-existing
-"${QLEVER[@]}" start --access-token "$TOKEN" --restart-policy unless-stopped
+# Smaller limits than the Qleverfile's: plenty for ManaGraph's size, and they
+# leave room for the next rebuild on a 12 GB server.
+"${QLEVER[@]}" start --access-token "$TOKEN" --restart-policy unless-stopped \
+  --memory-for-queries 2G --cache-max-size 1G
