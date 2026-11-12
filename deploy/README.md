@@ -25,6 +25,17 @@ Any Ubuntu machine with 12 GB RAM or more that is on your
 curl -fsSL https://raw.githubusercontent.com/GuySchnidrig/ManaGraph/main/deploy/setup.sh | bash -s -- --tailscale
 ```
 
+If Tailscale runs as a Docker container (e.g. `tailscale/tailscale`) instead
+of on the host, tell the script how to call it. With host networking
+(`network_mode: host`) it reaches QLever on port 7019 directly; otherwise give
+the host's address as seen from the container, usually the Docker bridge
+gateway:
+
+```sh
+curl -fsSL .../deploy/setup.sh \
+  | TAILSCALE="docker exec tailscale tailscale" TS_TARGET=http://172.17.0.1:7019 bash -s -- --tailscale
+```
+
 The endpoint is `https://<machine>.<tailnet>.ts.net/`, reachable only from your
 own devices. The first run asks you to enable HTTPS certificates for the
 tailnet if they are off; follow the link it prints.
