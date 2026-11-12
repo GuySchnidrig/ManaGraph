@@ -1,20 +1,45 @@
-# Deploying the public endpoint
+# Deploying the endpoint
 
 Runs the ManaGraph SPARQL endpoint on one Ubuntu server: the pipeline builds
-the graph on the server, QLever serves it, Caddy adds HTTPS, and a systemd
-timer rebuilds everything weekly from fresh Scryfall data.
+the graph on the server, QLever serves it, Tailscale or Caddy adds HTTPS, and
+a systemd timer rebuilds everything weekly from fresh Scryfall data.
 
 ```
-Scryfall bulk data ──► uv run managraph ──► qlever index ──► QLever :7019 ──► Caddy :443 ──► https://<site>/
+Scryfall bulk data ──► uv run managraph ──► qlever index ──► QLever :7019 ──► Tailscale / Caddy :443 ──► https://<site>/
                        (weekly, managraph-update.timer)
 ```
 
 | File | Purpose |
 |---|---|
-| [`setup.sh`](setup.sh) | One-time setup: Docker, uv, firewall, Caddy, timer, first build |
+| [`setup.sh`](setup.sh) | One-time setup: Docker, uv, swap, timer, first build, HTTPS |
 | [`update.sh`](update.sh) | Pull, rebuild the graph, reindex, restart QLever |
 | [`Caddyfile`](Caddyfile) | HTTPS reverse proxy to QLever |
 | [`managraph-update.service`](managraph-update.service), [`.timer`](managraph-update.timer) | Weekly rebuild, Mondays around 04:00 |
+
+## Home server with Tailscale
+
+Any Ubuntu machine with 12 GB RAM or more that is on your
+[tailnet](https://tailscale.com/kb/1136/tailnet). No router ports are opened.
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/GuySchnidrig/ManaGraph/main/deploy/setup.sh | bash -s -- --tailscale
+```
+
+The endpoint is `https://<machine>.<tailnet>.ts.net/`, reachable only from your
+own devices. The first run asks you to enable HTTPS certificates for the
+tailnet if they are off; follow the link it prints.
+
+To make it public, use `--funnel` instead, or switch later:
+
+```sh
+sudo tailscale serve reset && sudo tailscale funnel --bg 7019   # public
+sudo tailscale funnel reset && sudo tailscale serve --bg 7019   # back to private
+```
+
+Funnel needs the `funnel` attribute in the tailnet policy; the command prints a
+link to enable it. Traffic goes through Tailscale's relays, so your home IP
+stays hidden. Anyone can then send queries: each is capped by the 60 s
+timeout, but many heavy ones at once will load the server.
 
 ## Oracle Cloud Always Free
 
