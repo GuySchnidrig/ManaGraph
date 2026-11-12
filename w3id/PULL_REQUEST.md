@@ -15,6 +15,8 @@ else is added there: w3id only redirects, it does not host files.
       (one merged file of `ontology/*.ttl`) and is served as `text/turtle`:
       `curl -sIL <url> | grep -iE '^(HTTP|content-type)'`
 - [ ] `https://guyschnidrig.github.io/ManaGraph/ontology/` has HTML documentation.
+- [ ] The SPARQL endpoint answers `DESCRIBE` with Turtle:
+      `curl -s 'https://homelab.taila88e34.ts.net/?query=DESCRIBE%20%3Chttps://w3id.org/managraph/set/lea%3E' -H 'Accept: text/turtle' | head`
 - [ ] If the IRI scheme in `src/managraph/iri.py` changed, update the rules here.
 
 ## Steps
@@ -52,7 +54,9 @@ knowledge graph of Magic: The Gathering cards
   `Accept: text/turtle` and to the HTML documentation otherwise. Terms are hash
   IRIs (`/managraph/ontology#Card`).
 - Everything else (`/managraph/card/{id}`, `/managraph/printing/{id}`,
-  `/managraph/set/{code}`, ...) returns 302 to the same path on the project's
-  GitHub Pages site.
+  `/managraph/set/{code}`, ...) returns 303 to `DESCRIBE <iri>` on the
+  project's SPARQL endpoint for `Accept: text/turtle` or
+  `application/n-triples`. Other clients get a 302 to the same path on the
+  project's GitHub Pages site, which shows the IRI and links to the query.
 
 Maintainer: Dr. Guy Schnidrig (@GuySchnidrig, ORCID https://orcid.org/0009-0003-8320-8498)

@@ -5,8 +5,10 @@
 #
 # - https://w3id.org/managraph/ontology is the ManaGraph ontology. RDF clients
 #   asking for Turtle get the Turtle file, everyone else the documentation.
-# - Everything else under https://w3id.org/managraph/ redirects to the
-#   project site at https://guyschnidrig.github.io/ManaGraph/
+# - Every other IRI (cards, printings, sets, types, ...) is described by the
+#   ManaGraph SPARQL endpoint: RDF clients asking for Turtle or N-Triples get
+#   the result of DESCRIBE <iri> from it. Everyone else is sent to the project
+#   site, which shows the IRI and links to the same query.
 #
 # ## Contact
 # This space is administered by:
@@ -24,5 +26,9 @@ RewriteRule ^ontology/?$ https://guyschnidrig.github.io/ManaGraph/ontology/manag
 # Ontology documentation, the default for browsers and other clients
 RewriteRule ^ontology/?$ https://guyschnidrig.github.io/ManaGraph/ontology/ [R=303,L]
 
-# Everything else
+# Any other IRI as RDF: DESCRIBE it on the SPARQL endpoint
+RewriteCond %{HTTP_ACCEPT} (text/turtle|application/n-triples)
+RewriteRule ^(.+)$ https://homelab.taila88e34.ts.net/?query=DESCRIBE\%20\%3Chttps://w3id.org/managraph/$1\%3E [R=303,NE,L]
+
+# Everything else: the project site
 RewriteRule ^(.*)$ https://guyschnidrig.github.io/ManaGraph/$1 [R=302,L]

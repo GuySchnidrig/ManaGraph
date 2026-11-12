@@ -65,3 +65,19 @@ def test_pages_carry_the_fan_content_notice(site):
         text = (out / path).read_text(encoding="utf-8")
         assert "unofficial Fan Content permitted under the" in text
         assert "not affiliated with or" in text
+
+
+def test_pages_link_the_endpoint(site):
+    out, _ = site
+    home = (out / "index.html").read_text(encoding="utf-8")
+    not_found = (out / "404.html").read_text(encoding="utf-8")
+    assert f'href="{docs.ENDPOINT}"' in home
+    assert docs.YASGUI + "#query=" in home
+    assert f'var endpoint = "{docs.ENDPOINT}";' in not_found
+    assert "ENDPOINT_URL" not in not_found and "YASGUI_URL" not in not_found
+
+
+def test_yasgui_link_encodes_query_and_endpoint():
+    link = docs.yasgui_link("SELECT * { ?s ?p ?o }")
+    assert link.startswith(docs.YASGUI + "#query=SELECT%20%2A%20%7B")
+    assert "&endpoint=https%3A%2F%2F" in link

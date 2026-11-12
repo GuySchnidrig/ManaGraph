@@ -11,7 +11,7 @@ A linked data knowledge graph of Magic: The Gathering cards, built from Scryfall
 
 The JSON files and APIs from Scryfall are great for looking up cards. ManaGraph adds what they can't do: arbitrary joins, aggregations and property-path queries across cards, printings, rulings and external identifiers, on top of an ontology of Magic's type system.
 
-> **Status:** early development. The full build runs end to end (about 35,000 cards, 4.5 million triples), but there is no public endpoint yet.
+> **Status:** early development. The full build runs end to end (about 35,000 cards, 4.5 million triples), and a proof-of-concept public endpoint serves it.
 
 ## Setup
 
@@ -48,6 +48,22 @@ uv run python -m managraph.rules
 
 ## Query it
 
+### Public endpoint
+
+```
+https://homelab.taila88e34.ts.net/
+```
+
+This is a proof of concept running on a home server and rebuilt weekly from fresh Scryfall data. It has no uptime guarantee. Open it in [YASGUI](https://yasgui.triply.cc/) or any other SPARQL client, or use curl:
+
+```sh
+curl -s https://homelab.taila88e34.ts.net/ -H 'Accept: application/sparql-results+json'   --data-urlencode 'query@queries/changeling-elves.rq'
+```
+
+`DESCRIBE <iri>` returns everything about one card, printing or set, as Turtle or N-Triples.
+
+### Your own copy
+
 Serve the graph with [QLever](https://github.com/ad-freiburg/qlever). The `qlever` command line tool needs Python 3.12 or later and runs QLever in Docker, so it works on Linux and macOS. On Windows, run it inside WSL2 with Docker, since it generates Linux shell commands.
 
 ```sh
@@ -65,7 +81,7 @@ uv run python -m managraph.query "SELECT ?t WHERE { ?c mg:name 'Dryad Arbor' ; a
 uv run python -m managraph.query                                           # interactive
 ```
 
-To run a public endpoint on a server, with HTTPS and a weekly rebuild, see [`deploy/`](deploy/README.md). It covers a home server on Tailscale and Oracle Cloud's Always Free tier.
+To run an endpoint on a server, with HTTPS and a weekly rebuild, see [`deploy/`](deploy/README.md). It covers a home server behind Tailscale and a cloud VM.
 
 [`queries/`](queries/) has example queries in plain SPARQL 1.1:
 

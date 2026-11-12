@@ -87,8 +87,8 @@ case "$MODE" in
     ;;
   *)
     sudo apt-get install -yq iptables-persistent
-    # Oracle's Ubuntu images reject everything but SSH in iptables, on top of
-    # the VCN security list (open 80 and 443 there too, see deploy/README.md).
+    # Some cloud images reject everything but SSH in iptables, on top of the
+    # provider's firewall (open 80 and 443 there too, see deploy/README.md).
     for port in 80 443; do
       sudo iptables -C INPUT -p tcp --dport "$port" -j ACCEPT 2>/dev/null \
         || sudo iptables -I INPUT -p tcp --dport "$port" -j ACCEPT
