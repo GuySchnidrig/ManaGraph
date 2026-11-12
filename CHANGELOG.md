@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.1](https://github.com/GuySchnidrig/ManaGraph/compare/v0.6.0...v0.6.1) (2026-11-12)
+
+
+### Bug Fixes
+
+* support a containerized Tailscale in the deployment ([9179a52](https://github.com/GuySchnidrig/ManaGraph/commit/9179a52edf085b9a4cdf2c1ecfed3e5581e7c835))
+* support a containerized Tailscale in the deployment ([efdae7e](https://github.com/GuySchnidrig/ManaGraph/commit/efdae7eb25a100898b6d5c1c2c7060ea1c3a8955))
+
+
+### Documentation
+
+* document the public endpoint and resolve IRIs through it ([bffa0f0](https://github.com/GuySchnidrig/ManaGraph/commit/bffa0f0fc8f131e19c838d0a7600e6ccfb284059))
+* document the public endpoint and resolve IRIs through it ([661ace8](https://github.com/GuySchnidrig/ManaGraph/commit/661ace8e7f8c5acc241250b6b0561652d526de50))
+
 ## [0.6.0](https://github.com/GuySchnidrig/ManaGraph/compare/v0.5.0...v0.6.0) (2026-11-12)
 
 
