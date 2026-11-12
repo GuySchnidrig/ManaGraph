@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly ManaGraph rebuild
+
+[Timer]
+OnCalendar=Mon *-*-* 04:00:00
+RandomizedDelaySec=1h
+Persistent=true
+
+[Install]
+WantedBy=timers.target
