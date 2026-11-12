@@ -11,6 +11,10 @@
 # Fetch and run it in one go:
 #   curl -fsSL https://raw.githubusercontent.com/GuySchnidrig/ManaGraph/main/deploy/setup.sh | bash -s -- --tailscale
 #
+# If Tailscale runs in a Docker container rather than on the host, say how to
+# reach it and, unless the container uses host networking, where QLever is:
+#   TAILSCALE="docker exec tailscale tailscale" TS_TARGET=http://172.17.0.1:7019 setup.sh --tailscale
+#
 # Run it as a normal user with sudo, not root. It installs Docker (if missing)
 # and uv, clones the repo, exposes QLever over HTTPS, installs a weekly rebuild
 # timer and runs the first build.
@@ -19,13 +23,16 @@ set -euo pipefail
 REPO=https://github.com/GuySchnidrig/ManaGraph.git
 DIR="$HOME/ManaGraph"
 MODE="${1:-}"
+read -ra TS <<< "${TAILSCALE:-tailscale}"   # the tailscale CLI, possibly via docker exec
+TS_TARGET="${TS_TARGET:-7019}"               # what Tailscale proxies to
 
 if [[ $EUID -eq 0 ]]; then
   echo "Run as a normal user with sudo, not as root." >&2
   exit 1
 fi
-if [[ $MODE == --tailscale || $MODE == --funnel ]] && ! command -v tailscale >/dev/null; then
-  echo "Tailscale is not installed: https://tailscale.com/download/linux" >&2
+if [[ $MODE == --tailscale || $MODE == --funnel ]] && ! sudo "${TS[@]}" version >/dev/null 2>&1; then
+  echo "Can't run '${TS[*]}'. Install Tailscale (https://tailscale.com/download/linux)," >&2
+  echo "or, if it runs in a container, set TAILSCALE=\"docker exec <container> tailscale\"." >&2
   exit 1
 fi
 
@@ -72,11 +79,11 @@ case "$MODE" in
     # Tailscale terminates HTTPS with a certificate for the machine's
     # MagicDNS name and proxies to QLever; nothing is opened on the router.
     if [[ $MODE == --funnel ]]; then
-      sudo tailscale funnel --bg 7019
+      sudo "${TS[@]}" funnel --bg "$TS_TARGET"
     else
-      sudo tailscale serve --bg 7019
+      sudo "${TS[@]}" serve --bg "$TS_TARGET"
     fi
-    SITE="$(tailscale status --json | python3 -c 'import json, sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))')"
+    SITE="$(sudo "${TS[@]}" status --json | python3 -c 'import json, sys; print(json.load(sys.stdin)["Self"]["DNSName"].rstrip("."))')"
     ;;
   *)
     sudo apt-get install -yq iptables-persistent
